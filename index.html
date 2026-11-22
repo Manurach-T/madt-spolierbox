@@ -1699,7 +1699,7 @@
 
             const isSupabaseConfigured =
                 SUPABASE_CONFIG.URL.startsWith('https://') &&
-                SUPABASE_CONFIG.ANON_KEY.length > 20;
+                SUPABASE_CONFIG.ANON_KEY.trim().length > 15;
 
             const supabaseClient = isSupabaseConfigured && window.supabase
                 ? window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY)
@@ -1884,7 +1884,7 @@
             /* ------------------------------------------------------------------
                2. APPLICATION STATE & STORAGE
                ------------------------------------------------------------------ */
-            const STORAGE_KEY_READ_IDS = 'spoilerbox_read_movie_ids_v1';
+            const STORAGE_KEY_PREFIX = 'spoilerbox_read_movie_ids_v2_';
 
             let state = {
                 movies: [],
@@ -1897,15 +1897,26 @@
                 selectedPlatform: 'ALL',
                 selectedTimeFilter: 'ALL',
                 isErrorSimulated: false,
-                readMovieIds: loadLocalReadHistory(),
+                readMovieIds: [],
                 activeModalMovieId: null,
                 activeModalDepth: 'overview',
                 selectedPosterTheme: 'noir'
             };
 
+            function getCurrentReadStorageKey() {
+                if (state.user && state.user.id) {
+                    return `${STORAGE_KEY_PREFIX}user_${state.user.id}`;
+                }
+                if (state.isGuestDemo) {
+                    return `${STORAGE_KEY_PREFIX}guest_demo`;
+                }
+                return `${STORAGE_KEY_PREFIX}anonymous`;
+            }
+
             function loadLocalReadHistory() {
                 try {
-                    const saved = localStorage.getItem(STORAGE_KEY_READ_IDS);
+                    const key = getCurrentReadStorageKey();
+                    const saved = localStorage.getItem(key);
                     return saved ? JSON.parse(saved) : [];
                 } catch (e) {
                     return [];
@@ -1914,7 +1925,8 @@
 
             function saveLocalReadHistory() {
                 try {
-                    localStorage.setItem(STORAGE_KEY_READ_IDS, JSON.stringify(state.readMovieIds));
+                    const key = getCurrentReadStorageKey();
+                    localStorage.setItem(key, JSON.stringify(state.readMovieIds));
                 } catch (e) {}
             }
 
@@ -2038,6 +2050,7 @@
                 if (!supabaseClient) {
                     state.movies = FALLBACK_MOVIES;
                     FALLBACK_MOVIES.forEach(m => { state.spoilersCache[m.id] = m.spoilers; });
+                    state.readMovieIds = loadLocalReadHistory();
                     els.dbStatusBadge.innerHTML = '🟡 โหมดออฟไลน์ (ใส่ Supabase Key เพื่อเปิดใช้งาน Cloud)';
                     updateSavedTimeDashboard();
                     renderMovies();
@@ -2050,6 +2063,8 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session?.user) {
                     await handleUserSignedIn(session.user);
+                } else {
+                    state.readMovieIds = loadLocalReadHistory();
                 }
 
                 updateLoginGateVisibility();
@@ -2082,6 +2097,12 @@
 
             async function handleUserSignedIn(user) {
                 state.user = user;
+                state.isGuestDemo = false;
+
+                // ล้าง state เก่าก่อนโหลดของ user คนใหม่เพื่อไม่ให้ข้อมูลปะปนกัน
+                state.crmProfile = null;
+                state.readMovieIds = loadLocalReadHistory();
+
                 const [profileRes, txRes] = await Promise.all([
                     supabaseClient.from('profiles').select('*').eq('id', user.id).single(),
                     supabaseClient.from('reading_transactions').select('movie_id').eq('user_id', user.id)
@@ -2293,6 +2314,14 @@
             }
 
             function updateSavedTimeDashboard() {
+                // หากล็อกอินด้วยบัญชี CRM จริง ให้ใช้ยอดเวลาสะสมจากฐานข้อมูล profiles ของผู้ใช้นั้นโดยตรง
+                if (state.user && state.crmProfile && typeof state.crmProfile.total_saved_minutes === 'number') {
+                    const dbSavedMins = state.crmProfile.total_saved_minutes;
+                    els.totalSavedDisplay.textContent = formatDurationThai(dbSavedMins);
+                    els.btnResetStats.disabled = dbSavedMins === 0 && state.readMovieIds.length === 0;
+                    return;
+                }
+
                 let totalSaved = 0;
                 state.readMovieIds.forEach(id => {
                     const movie = state.movies.find(m => m.id === id);
@@ -2302,7 +2331,7 @@
                 });
 
                 els.totalSavedDisplay.textContent = formatDurationThai(totalSaved);
-                els.btnResetStats.disabled = state.readMovieIds.length === 0;
+                els.btnResetStats.disabled = totalSaved === 0 && state.readMovieIds.length === 0;
             }
 
             function getFilteredMovies() {
@@ -2620,17 +2649,28 @@
                     state.user = null;
                     state.crmProfile = null;
                     state.isGuestDemo = false;
+                    state.readMovieIds = [];
                     updateCrmAuthHeaderUI();
+                    updateSavedTimeDashboard();
+                    renderMovies();
                     showToast('ออกจากระบบเรียบร้อยแล้ว');
                 } else {
                     state.isGuestDemo = false;
+                    state.readMovieIds = [];
                     updateCrmAuthHeaderUI();
+                    updateSavedTimeDashboard();
+                    renderMovies();
                 }
             });
 
             els.btnDemoBypass.addEventListener('click', () => {
+                state.user = null;
+                state.crmProfile = null;
                 state.isGuestDemo = true;
+                state.readMovieIds = loadLocalReadHistory();
                 updateCrmAuthHeaderUI();
+                updateSavedTimeDashboard();
+                renderMovies();
                 showToast('🍿 เข้าใช้งานในโหมดทดลองเรียบร้อยแล้ว');
             });
 
@@ -2663,6 +2703,8 @@
 
                     if (data.user) {
                         state.isGuestDemo = false;
+                        // สำหรับ user ใหม่ ให้เริ่มต้นประวัติการอ่านว่างเปล่าก่อนซิงก์จาก DB
+                        localStorage.removeItem(`${STORAGE_KEY_PREFIX}user_${data.user.id}`);
                         await handleUserSignedIn(data.user);
                         els.authForm.reset();
                         showToast(state.isSignUpMode ? '🎉 สมัครสมาชิกและเข้าสู่ระบบสำเร็จ!' : '👋 ยินดีต้อนรับเข้าสู่ SPOILERBOX!');
@@ -2698,6 +2740,11 @@
                 if (supabaseClient && state.user) {
                     await supabaseClient.from('reading_transactions').delete().eq('user_id', state.user.id);
                     await supabaseClient.from('profiles').update({ total_saved_minutes: 0, crm_segment: 'NEW_JOINER' }).eq('id', state.user.id);
+                    if (state.crmProfile) {
+                        state.crmProfile.total_saved_minutes = 0;
+                        state.crmProfile.crm_segment = 'NEW_JOINER';
+                    }
+                    updateCrmAuthHeaderUI();
                 }
                 updateSavedTimeDashboard();
                 renderMovies();
