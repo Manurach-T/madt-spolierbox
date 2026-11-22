@@ -1693,8 +1693,8 @@
                0. SUPABASE CONFIGURATION (ใส่ค่าจาก Supabase Project Settings -> API)
                ------------------------------------------------------------------ */
             const SUPABASE_CONFIG = {
-                URL: 'https://wpvysacmetogapkvovgi.supabase.co',
-                ANON_KEY: 'sb_publishable_79xx3UwPjFfqUTyCLCYbPg_j0WXCvgN'
+                URL: 'YOUR_SUPABASE_PROJECT_URL',
+                ANON_KEY: 'YOUR_SUPABASE_ANON_KEY'
             };
 
             const isSupabaseConfigured =
@@ -2609,6 +2609,10 @@
                     showToast(`เกิดข้อผิดพลาดในการบันทึก: ${err.message}`);
                 } finally {
                     els.btnSubmitCreate.disabled = false;
+                    els.btnSubmitCreate.textContent = '🚀 บันทึกและเผยแพร่สปอยทันที';
+                }
+            });
+
             // Login Gate & Auth Handlers
             els.btnCrmAuth.addEventListener('click', async () => {
                 if (state.user && supabaseClient) {
