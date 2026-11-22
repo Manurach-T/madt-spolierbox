@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client (CDN สำหรับเชื่อมต่อ Production Database) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         /* ==========================================================================
@@ -61,7 +63,7 @@
         }
 
         /* ==========================================================================
-           2. HEADER & TIME-SAVED DASHBOARD (Bento Top Bar)
+           2. HEADER & TIME-SAVED DASHBOARD (Bento Top Bar + CRM Auth)
            ========================================================================== */
         header {
             position: sticky;
@@ -115,8 +117,15 @@
             display: none;
         }
 
-        @media (min-width: 640px) {
+        @media (min-width: 768px) {
             .brand-sub { display: inline-block; margin-left: 0.5rem; border-left: 1px solid var(--border-subtle); padding-left: 0.75rem; }
+        }
+
+        .header-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         /* Time Saved Pill Tracker */
@@ -165,6 +174,42 @@
             text-decoration: none;
         }
 
+        /* CRM Member Button */
+        .btn-crm-auth {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 0.45rem 0.95rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-crm-auth:hover {
+            border-color: var(--brand-red);
+            background: var(--bg-surface-hover);
+        }
+
+        .btn-crm-auth.logged-in {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.1);
+            color: #6EE7B7;
+        }
+
+        .crm-segment-tag {
+            font-size: 0.68rem;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 0.1rem 0.45rem;
+            border-radius: 4px;
+            color: #FFF;
+        }
+
         /* ==========================================================================
            3. MAIN CONTAINER & HERO EDITORIAL SECTION
            ========================================================================== */
@@ -206,6 +251,20 @@
             color: var(--text-secondary);
             font-size: 1rem;
             max-width: 620px;
+        }
+
+        .db-status-pill {
+            justify-self: start;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            padding: 0.4rem 0.85rem;
+            border-radius: var(--radius-pill);
+        }
+
+        @media (min-width: 900px) {
+            .db-status-pill { justify-self: end; }
         }
 
         /* ==========================================================================
@@ -287,7 +346,6 @@
             color: #FFF;
         }
 
-        /* Filter Pills */
         .filter-group {
             display: flex;
             gap: 0.5rem;
@@ -315,7 +373,6 @@
             transition: all var(--transition-fast);
         }
 
-        /* HOVER STATE */
         .pill-btn:hover:not(:disabled) {
             background: var(--bg-surface-hover);
             color: var(--text-primary);
@@ -329,7 +386,6 @@
             font-weight: 600;
         }
 
-        /* DISABLED STATE */
         .pill-btn:disabled {
             opacity: 0.35;
             cursor: not-allowed;
@@ -345,7 +401,6 @@
             gap: 0.75rem;
         }
 
-        /* Error Simulation Toggle (For testing Error State easily) */
         .btn-simulate-error {
             background: transparent;
             border: 1px dashed var(--border-subtle);
@@ -382,7 +437,6 @@
             .bento-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
-            /* Editorial Bento Feature: First item spans 2 columns on desktop */
             .bento-card.featured {
                 grid-column: span 2;
             }
@@ -401,7 +455,6 @@
             transition: transform var(--transition-smooth), border-color var(--transition-smooth), background var(--transition-smooth);
         }
 
-        /* HOVER STATE FOR CARDS */
         .bento-card:hover {
             transform: translateY(-4px);
             background: var(--bg-surface-hover);
@@ -413,7 +466,6 @@
             border-color: rgba(16, 185, 129, 0.3);
         }
 
-        /* Poster Thumbnail Artwork Container */
         .card-poster {
             width: 100%;
             height: 175px;
@@ -764,89 +816,6 @@
             top: 90px;
         }
 
-        /* Modal Backdrop (Used for VIP Subscription Dialog) */
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            overflow-y: auto;
-        }
-
-        .modal-backdrop.open {
-            display: flex;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .modal-dialog {
-            background: var(--bg-surface);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 820px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
-        }
-
-        .modal-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            background: var(--bg-bento-highlight);
-        }
-
-        .modal-title-group h2 {
-            font-size: 1.35rem;
-            font-weight: 700;
-        }
-
-        .modal-subtitle {
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-        }
-
-        .btn-close-modal {
-            background: var(--bg-main);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-secondary);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-fast);
-            flex-shrink: 0;
-        }
-
-        .btn-close-modal:hover {
-            background: var(--brand-red);
-            color: #FFF;
-            border-color: var(--brand-red);
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        /* Modal Backdrop (Removed unused modal styles) */
-
-        /* Spoiler Depth Tabs */
         .depth-tabs {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -880,7 +849,6 @@
             color: #FFF;
         }
 
-        /* Bento Content Boxes inside Reader Page */
         .spoiler-content-box {
             background: var(--bg-surface);
             border: 1px solid var(--border-subtle);
@@ -964,17 +932,6 @@
             gap: 1rem;
         }
 
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border-subtle);
-            background: var(--bg-bento-highlight);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
         .saved-calculation-note {
             font-size: 0.92rem;
             color: var(--text-secondary);
@@ -982,6 +939,95 @@
 
         .saved-calculation-note strong {
             color: var(--badge-green);
+        }
+
+        /* ==========================================================================
+           8. CRM AUTH MODAL (Supabase Auth Login / Register)
+           ========================================================================== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .auth-dialog {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 440px;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-close-auth {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: var(--bg-main);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .btn-close-auth:hover {
+            background: var(--brand-red);
+            color: #FFF;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .auth-input {
+            width: 100%;
+            background: var(--bg-main);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--brand-red);
+        }
+
+        .auth-switch {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        .auth-switch button {
+            background: none;
+            border: none;
+            color: var(--brand-red);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: inherit;
         }
 
         /* Toast Notification */
@@ -1017,7 +1063,7 @@
 <body>
 
     <!-- ======================================================================
-         HEADER & TIME-SAVED TRACKER
+         HEADER & TIME-SAVED TRACKER + CRM MEMBER BUTTON
          ====================================================================== -->
     <header>
         <div class="nav-container">
@@ -1027,10 +1073,16 @@
                 <span class="brand-sub">อ่าน 2 นาที เหมือนดูมา 2 ชั่วโมง</span>
             </a>
 
-            <div class="time-saved-widget" aria-live="polite">
-                <span class="pulse-dot"></span>
-                <span>ประหยัดเวลาชีวิตไปแล้ว: <span class="time-saved-value" id="totalSavedDisplay">0 นาที</span></span>
-                <button type="button" class="btn-reset-stats" id="btnResetStats" disabled title="ล้างสถิติเวลาที่ประหยัดได้">รีเซ็ต</button>
+            <div class="header-right-actions">
+                <div class="time-saved-widget" aria-live="polite">
+                    <span class="pulse-dot"></span>
+                    <span>ประหยัดเวลาชีวิตไปแล้ว: <span class="time-saved-value" id="totalSavedDisplay">0 นาที</span></span>
+                    <button type="button" class="btn-reset-stats" id="btnResetStats" disabled title="ล้างสถิติเวลาที่ประหยัดได้">รีเซ็ต</button>
+                </div>
+
+                <button type="button" class="btn-crm-auth" id="btnCrmAuth">
+                    <span id="crmAuthText">เข้าสู่ระบบ / เก็บสถิติ CRM</span>
+                </button>
             </div>
         </div>
     </header>
@@ -1047,6 +1099,7 @@
                     <h1 class="hero-title">ไม่มีเวลาดูหนัง <span>แต่อยากเม้าส์กับเพื่อนรู้เรื่อง?</span></h1>
                     <p class="hero-desc">สรุปเนื้อเรื่องแบบสปอยครบทุกจุดหักมุม คัดเฉพาะเรื่องฮิตบนแพลตฟอร์มสตรีมมิง พร้อมโพยประโยคเด็ดเอาไว้เปิดวงสนทนา</p>
                 </div>
+                <div class="db-status-pill" id="dbStatusBadge">● กำลังเตรียมข้อมูล...</div>
             </section>
 
             <!-- Bento Filter & Search Controls -->
@@ -1095,7 +1148,7 @@
             <section id="errorState" class="state-container" role="alert">
                 <div class="state-icon">⚠️</div>
                 <h2 class="state-title">ไม่สามารถโหลดฐานข้อมูลสปอยได้</h2>
-                <p class="state-desc">เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์สตรีมมิงจำลอง กรุณาลองใหม่อีกครั้ง</p>
+                <p class="state-desc">เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์สตรีมมิง กรุณาลองใหม่อีกครั้ง</p>
                 <button type="button" id="btnRetryLoad" class="btn-primary-action">ลองเชื่อมต่อใหม่</button>
             </section>
         </div>
@@ -1157,320 +1210,224 @@
         </section>
     </main>
 
+    <!-- ======================================================================
+         CRM MEMBER LOGIN / REGISTER MODAL (Supabase Auth)
+         ====================================================================== -->
+    <div id="authModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+        <div class="auth-dialog">
+            <button type="button" id="btnCloseAuthModal" class="btn-close-auth" aria-label="ปิดหน้าต่าง">✕</button>
+            <h2 id="authModalTitle" style="font-size: 1.35rem; font-weight: 800;">เข้าสู่ระบบ SPOILERBOX CRM</h2>
+            <p id="authModalDesc" style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.35rem;">ซิงก์ประวัติการอ่านและเวลาชีวิตที่ประหยัดได้ขึ้นฐานข้อมูล Supabase</p>
+
+            <form id="authForm" class="auth-form">
+                <input type="email" id="authEmail" class="auth-input" placeholder="อีเมลของคุณ (เช่น movie@example.com)" required>
+                <input type="password" id="authPassword" class="auth-input" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" minlength="6" required>
+                <button type="submit" id="btnSubmitAuth" class="btn-primary-action" style="width: 100%; padding: 0.85rem;">เข้าสู่ระบบ</button>
+            </form>
+
+            <div class="auth-switch">
+                <span id="authSwitchPrompt">ยังไม่มีบัญชีสมาชิก?</span>
+                <button type="button" id="btnToggleAuthMode">สมัครสมาชิกใหม่</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toastNotification" class="toast" role="status"></div>
 
     <!-- ======================================================================
-         VANILLA JAVASCRIPT LOGIC & STATE MANAGEMENT
+         VANILLA JAVASCRIPT LOGIC & SUPABASE INTEGRATION
          ====================================================================== -->
     <script>
         (function () {
             'use strict';
 
             /* ------------------------------------------------------------------
-               0. CUSTOM SVG POSTER ARTWORKS (Zero External Dependencies)
+               0. SUPABASE CONFIGURATION (ใส่ค่าจาก Supabase Project Settings -> API)
                ------------------------------------------------------------------ */
-            const POSTER_SVGS = {
-                'mv-00': `
-                    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="stormBg" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#1E293B"/>
-                                <stop offset="55%" stop-color="#0F172A"/>
-                                <stop offset="100%" stop-color="#05080F"/>
-                            </linearGradient>
-                            <radialGradient id="flashlight" cx="0.62" cy="0.68" r="0.45">
-                                <stop offset="0%" stop-color="rgba(226, 232, 240, 0.45)"/>
-                                <stop offset="60%" stop-color="rgba(148, 163, 184, 0.1)"/>
-                                <stop offset="100%" stop-color="rgba(15, 23, 42, 0)"/>
-                            </radialGradient>
-                        </defs>
-                        <rect width="600" height="320" fill="url(#stormBg)"/>
-                        <!-- Forest Silhouettes -->
-                        <path d="M0 240 L35 120 L70 240 Z M50 240 L95 95 L140 240 Z M120 240 L165 135 L210 240 Z M440 240 L485 100 L530 240 Z M500 240 L550 115 L600 240 Z" fill="#090D16"/>
-                        <!-- Ghostly Shadow Hands in Mist -->
-                        <g fill="rgba(148, 163, 184, 0.18)">
-                            <path d="M475 180 C475 150, 482 145, 485 168 C488 140, 495 140, 496 165 C500 142, 507 145, 505 170 C512 152, 518 158, 512 182 L505 220 L482 220 Z"/>
-                            <path d="M535 125 C535 102, 540 98, 543 116 C546 95, 551 95, 552 114 C556 97, 561 100, 559 118 L552 155 L538 155 Z"/>
-                        </g>
-                        <!-- Flashlight Beam -->
-                        <polygon points="365,225 560,110 580,270" fill="url(#flashlight)"/>
-                        <!-- Detective Silhouette -->
-                        <circle cx="350" cy="145" r="24" fill="#1E293B"/>
-                        <path d="M310 320 L320 185 C325 172, 375 172, 380 185 L395 320 Z" fill="#111827"/>
-                        <!-- Rain Streaks -->
-                        <g stroke="rgba(203, 213, 225, 0.25)" stroke-width="1.5" stroke-linecap="round">
-                            <line x1="80" y1="20" x2="65" y2="65"/><line x1="190" y1="40" x2="175" y2="85"/>
-                            <line x1="310" y1="15" x2="295" y2="60"/><line x1="430" y1="30" x2="415" y2="75"/>
-                            <line x1="540" y1="10" x2="525" y2="55"/><line x1="140" y1="150" x2="125" y2="195"/>
-                        </g>
-                        <!-- Poster Typography -->
-                        <text x="32" y="165" fill="#F8FAFC" font-family="'Noto Sans Thai', sans-serif" font-weight="800" font-size="44" letter-spacing="-1">เงาในพายุ</text>
-                        <text x="34" y="196" fill="#EF4444" font-family="'Noto Sans Thai', sans-serif" font-weight="700" font-size="18">เสียงที่ไม่ได้รับเชิญ</text>
-                    </svg>
-                `,
-                'mv-01': `
-                    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="exhumaBg" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#1C1917"/>
-                                <stop offset="100%" stop-color="#09090B"/>
-                            </linearGradient>
-                        </defs>
-                        <rect width="600" height="320" fill="url(#exhumaBg)"/>
-                        <!-- Blood Moon & Mist -->
-                        <circle cx="460" cy="110" r="65" fill="#7F1D1D" opacity="0.65"/>
-                        <!-- Cursed Vertical Coffin & Talisman -->
-                        <rect x="425" y="75" width="70" height="190" rx="6" fill="#18181B" stroke="#DC2626" stroke-width="2"/>
-                        <line x1="460" y1="90" x2="460" y2="250" stroke="#DC2626" stroke-width="2" stroke-dasharray="8 6"/>
-                        <line x1="438" y1="130" x2="482" y2="130" stroke="#DC2626" stroke-width="2"/>
-                        <!-- Mountains -->
-                        <path d="M0 280 Q160 170 340 270 T600 240 L600 320 L0 320 Z" fill="#0C0A09"/>
-                        <text x="32" y="140" fill="#FCA5A5" font-family="'Inter', sans-serif" font-weight="800" font-size="38" letter-spacing="4">EXHUMA</text>
-                        <text x="34" y="172" fill="#D6D3D1" font-family="'Noto Sans Thai', sans-serif" font-weight="600" font-size="18">ขุดมันขึ้นมาจากหลุม</text>
-                    </svg>
-                `,
-                'mv-02': `
-                    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="duneSky" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#451A03"/>
-                                <stop offset="55%" stop-color="#B45309"/>
-                                <stop offset="100%" stop-color="#F59E0B"/>
-                            </linearGradient>
-                        </defs>
-                        <rect width="600" height="320" fill="url(#duneSky)"/>
-                        <!-- Arrakis Giant Sun -->
-                        <circle cx="440" cy="135" r="85" fill="#FDE68A" opacity="0.85"/>
-                        <!-- Sand Dunes -->
-                        <path d="M0 220 Q200 160 390 230 T600 200 L600 320 L0 320 Z" fill="#78350F"/>
-                        <path d="M0 255 Q260 215 600 275 L600 320 L0 320 Z" fill="#451A03"/>
-                        <!-- Lone Fremen Silhouette -->
-                        <path d="M295 215 L303 185 L311 215 Z" fill="#1C1917"/>
-                        <text x="32" y="130" fill="#FFFBEB" font-family="'Inter', sans-serif" font-weight="800" font-size="42" letter-spacing="8">DUNE</text>
-                        <text x="35" y="160" fill="#FDE68A" font-family="'Inter', sans-serif" font-weight="700" font-size="16" letter-spacing="4">PART TWO</text>
-                    </svg>
-                `,
-                'mv-03': `
-                    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="insideBg" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#311042"/>
-                                <stop offset="50%" stop-color="#1E1B4B"/>
-                                <stop offset="100%" stop-color="#0F172A"/>
-                            </linearGradient>
-                        </defs>
-                        <rect width="600" height="320" fill="url(#insideBg)"/>
-                        <!-- Glowing Memory Orbs -->
-                        <circle cx="420" cy="110" r="42" fill="#FACC15" opacity="0.85"/>
-                        <circle cx="495" cy="150" r="36" fill="#FB923C" opacity="0.9"/>
-                        <circle cx="440" cy="195" r="32" fill="#38BDF8" opacity="0.8"/>
-                        <circle cx="515" cy="215" r="28" fill="#A855F7" opacity="0.85"/>
-                        <circle cx="375" cy="175" r="26" fill="#4ADE80" opacity="0.8"/>
-                        <text x="32" y="140" fill="#FFFFFF" font-family="'Inter', sans-serif" font-weight="800" font-size="34">INSIDE OUT 2</text>
-                        <text x="34" y="170" fill="#FDBA74" font-family="'Noto Sans Thai', sans-serif" font-weight="600" font-size="17">มหัศจรรย์อารมณ์อลเวง 2</text>
-                    </svg>
-                `,
-                'mv-04': `
-                    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="600" height="320" fill="#111827"/>
-                        <!-- Modernist Mansion Window Grid -->
-                        <rect x="340" y="45" width="220" height="145" fill="#1F2937" stroke="#4B5563" stroke-width="3"/>
-                        <line x1="450" y1="45" x2="450" y2="190" stroke="#4B5563" stroke-width="3"/>
-                        <!-- Green Lawn -->
-                        <rect x="340" y="160" width="220" height="30" fill="#065F46"/>
-                        <!-- Basement Stairs Leading Down -->
-                        <path d="M340 215 L560 215 L560 320 L340 320 Z" fill="#030712"/>
-                        <path d="M360 230 H540 M360 255 H540 M360 280 H540 M360 305 H540" stroke="#374151" stroke-width="4"/>
-                        <text x="32" y="140" fill="#F9FAFB" font-family="'Inter', sans-serif" font-weight="800" font-size="36" letter-spacing="3">PARASITE</text>
-                        <text x="34" y="170" fill="#34D399" font-family="'Noto Sans Thai', sans-serif" font-weight="600" font-size="18">ชนชั้นปรสิต</text>
-                    </svg>
-                `,
-                'mv-05': `
-                    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="boysBg" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#1E3A8A"/>
-                                <stop offset="60%" stop-color="#172554"/>
-                                <stop offset="100%" stop-color="#450A0A"/>
-                            </linearGradient>
-                        </defs>
-                        <rect width="600" height="320" fill="url(#boysBg)"/>
-                        <!-- Laser Eyes Beam Effect -->
-                        <polygon points="445,115 600,70 600,125" fill="#EF4444" opacity="0.85"/>
-                        <polygon points="475,115 600,90 600,145" fill="#F87171" opacity="0.9"/>
-                        <circle cx="445" cy="115" r="7" fill="#FEF2F2"/>
-                        <circle cx="475" cy="115" r="7" fill="#FEF2F2"/>
-                        <!-- Cape Silhouette -->
-                        <path d="M405 140 L515 140 L545 320 L380 320 Z" fill="#991B1B"/>
-                        <text x="32" y="140" fill="#FFFFFF" font-family="'Inter', sans-serif" font-weight="800" font-size="40" letter-spacing="2">THE BOYS</text>
-                        <text x="34" y="170" fill="#FCA5A5" font-family="'Noto Sans Thai', sans-serif" font-weight="600" font-size="17">ก๊วนหนุ่มซ่าล่าซูเปอร์ฮีโร่ SS4</text>
-                    </svg>
-                `,
-                'mv-06': `
-                    <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="600" height="320" fill="#0F172A"/>
-                        <!-- Snowy Chalet Roof -->
-                        <polygon points="450,60 330,175 570,175" fill="#E2E8F0"/>
-                        <rect x="355" y="175" width="190" height="145" fill="#1E293B"/>
-                        <!-- Top Attic Window -->
-                        <rect x="435" y="115" width="30" height="36" fill="#FDE047"/>
-                        <!-- Falling Soundwave / Evidence Line -->
-                        <path d="M450 155 L450 285" stroke="#EF4444" stroke-width="2" stroke-dasharray="5 5"/>
-                        <text x="32" y="135" fill="#F8FAFC" font-family="'Inter', sans-serif" font-weight="800" font-size="28" letter-spacing="1">ANATOMY OF A FALL</text>
-                        <text x="34" y="166" fill="#94A3B8" font-family="'Noto Sans Thai', sans-serif" font-weight="600" font-size="18">เขาบอกว่าเธอฆ่า</text>
-                    </svg>
-                `
+            const SUPABASE_CONFIG = {
+                URL: 'https://wpvysacmetogapkvovgi.supabase.co/rest/v1/',
+                ANON_KEY: 'sb_publishable_79xx3UwPjFfqUTyCLCYbPg_j0WXCvgN'
             };
 
+            const isSupabaseConfigured =
+                SUPABASE_CONFIG.URL.startsWith('https://') &&
+                SUPABASE_CONFIG.ANON_KEY.length > 20;
+
+            const supabaseClient = isSupabaseConfigured && window.supabase
+                ? window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY)
+                : null;
+
             /* ------------------------------------------------------------------
-               1. MOCK STREAMING DATABASE (Curated Thai Spoilers)
+               1. FALLBACK LOCAL DATA (ทำงานสำรองอัตโนมัติหากยังไม่ใส่ Supabase Key)
                ------------------------------------------------------------------ */
-            const MOVIES_DATA = [
+            const FALLBACK_POSTERS = {
+                'mv-00': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="stormBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E293B"/><stop offset="55%" stop-color="#0F172A"/><stop offset="100%" stop-color="#05080F"/></linearGradient><radialGradient id="flashlight" cx="0.62" cy="0.68" r="0.45"><stop offset="0%" stop-color="rgba(226, 232, 240, 0.45)"/><stop offset="60%" stop-color="rgba(148, 163, 184, 0.1)"/><stop offset="100%" stop-color="rgba(15, 23, 42, 0)"/></radialGradient></defs><rect width="600" height="320" fill="url(#stormBg)"/><path d="M0 240 L35 120 L70 240 Z M50 240 L95 95 L140 240 Z M120 240 L165 135 L210 240 Z M440 240 L485 100 L530 240 Z M500 240 L550 115 L600 240 Z" fill="#090D16"/><polygon points="365,225 560,110 580,270" fill="url(#flashlight)"/><circle cx="350" cy="145" r="24" fill="#1E293B"/><path d="M310 320 L320 185 C325 172, 375 172, 380 185 L395 320 Z" fill="#111827"/><text x="32" y="165" fill="#F8FAFC" font-family="sans-serif" font-weight="800" font-size="44">เงาในพายุ</text><text x="34" y="196" fill="#EF4444" font-family="sans-serif" font-weight="700" font-size="18">เสียงที่ไม่ได้รับเชิญ</text></svg>`,
+                'mv-01': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="320" fill="#1C1917"/><circle cx="460" cy="110" r="65" fill="#7F1D1D" opacity="0.65"/><rect x="425" y="75" width="70" height="190" rx="6" fill="#18181B" stroke="#DC2626" stroke-width="2"/><text x="32" y="140" fill="#FCA5A5" font-family="sans-serif" font-weight="800" font-size="38">EXHUMA</text><text x="34" y="172" fill="#D6D3D1" font-family="sans-serif" font-weight="600" font-size="18">ขุดมันขึ้นมาจากหลุม</text></svg>`,
+                'mv-02': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="320" fill="#78350F"/><circle cx="440" cy="135" r="85" fill="#FDE68A" opacity="0.85"/><path d="M0 220 Q200 160 390 230 T600 200 L600 320 L0 320 Z" fill="#451A03"/><text x="32" y="130" fill="#FFFBEB" font-family="sans-serif" font-weight="800" font-size="42">DUNE</text><text x="35" y="160" fill="#FDE68A" font-family="sans-serif" font-weight="700" font-size="16">PART TWO</text></svg>`,
+                'mv-03': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="320" fill="#1E1B4B"/><circle cx="420" cy="110" r="42" fill="#FACC15"/><circle cx="495" cy="150" r="36" fill="#FB923C"/><circle cx="440" cy="195" r="32" fill="#38BDF8"/><text x="32" y="140" fill="#FFFFFF" font-family="sans-serif" font-weight="800" font-size="34">INSIDE OUT 2</text><text x="34" y="170" fill="#FDBA74" font-family="sans-serif" font-weight="600" font-size="17">มหัศจรรย์อารมณ์อลเวง 2</text></svg>`,
+                'mv-04': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="320" fill="#111827"/><rect x="340" y="45" width="220" height="145" fill="#1F2937" stroke="#4B5563" stroke-width="3"/><rect x="340" y="160" width="220" height="30" fill="#065F46"/><text x="32" y="140" fill="#F9FAFB" font-family="sans-serif" font-weight="800" font-size="36">PARASITE</text><text x="34" y="170" fill="#34D399" font-family="sans-serif" font-weight="600" font-size="18">ชนชั้นปรสิต</text></svg>`,
+                'mv-05': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="320" fill="#172554"/><polygon points="445,115 600,70 600,125" fill="#EF4444"/><text x="32" y="140" fill="#FFFFFF" font-family="sans-serif" font-weight="800" font-size="40">THE BOYS</text><text x="34" y="170" fill="#FCA5A5" font-family="sans-serif" font-weight="600" font-size="17">ก๊วนหนุ่มซ่าล่าซูเปอร์ฮีโร่ SS4</text></svg>`,
+                'mv-06': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="320" fill="#0F172A"/><polygon points="450,60 330,175 570,175" fill="#E2E8F0"/><rect x="355" y="175" width="190" height="145" fill="#1E293B"/><text x="32" y="135" fill="#F8FAFC" font-family="sans-serif" font-weight="800" font-size="28">ANATOMY OF A FALL</text><text x="34" y="166" fill="#94A3B8" font-family="sans-serif" font-weight="600" font-size="18">เขาบอกว่าเธอฆ่า</text></svg>`
+            };
+
+            const FALLBACK_MOVIES = [
                 {
                     id: 'mv-00',
                     title: 'เงาในพายุ: เสียงที่ไม่ได้รับเชิญ',
                     platform: 'Netflix',
                     genre: 'ระทึกขวัญ / เหนือธรรมชาติ',
-                    year: 2025,
-                    runtimeMinutes: 128,
-                    wordCount: 590, // ~3 mins
-                    gossipScore: '9.9/10',
-                    featured: true,
-                    hook: 'พายุฝนถล่มตัดขาดหมู่บ้านกลางหุบเขา สารวัตรหนุ่มออกตามหาคนหายกลางป่า แต่กลับพบเสียงเรียกจากความมืดและเงาปริศนาที่รู้ความลับในอดีตของทุกคน',
+                    release_year: 2025,
+                    runtime_minutes: 128,
+                    word_count: 590,
+                    gossip_score: '9.9/10',
+                    is_featured: true,
+                    hook_summary: 'พายุฝนถล่มตัดขาดหมู่บ้านกลางหุบเขา สารวัตรหนุ่มออกตามหาคนหายกลางป่า แต่กลับพบเสียงเรียกจากความมืดและเงาปริศนาที่รู้ความลับในอดีตของทุกคน',
+                    poster_svg: FALLBACK_POSTERS['mv-00'],
                     spoilers: {
                         overview: 'เกิดพายุใหญ่พัดถล่มหมู่บ้านชายขอบจนสัญญาณโทรศัพท์และถนนถูกตัดขาด ชาวบ้านเริ่มหายตัวไปทีละคนหลังได้ยินเสียงเคาะประตูยามวิกาล สารวัตรหนุ่มจึงถือไฟฉายออกสำรวจป่าทึบและพบว่าหมู่บ้านนี้ไม่ได้อยู่บนแผนที่ราชการมานานกว่า 30 ปีแล้ว',
                         detailed: 'ระหว่างสืบสวน สารวัตรพบสมุดบันทึกของอดีตผู้ใหญ่บ้านที่เผยความจริงสุดช็อกว่า ชาวบ้านรุ่นก่อนเคยทำพิธีปิดผนึกทางเข้าเหมืองร้างเพื่อแลกกับการรอดพ้นจากโรคระบาด แต่การสร้างเขื่อนใหม่ทำให้ผนึกแตกออก เงาปริศนาในพายุไม่ใช่ผีเร่ร่อน แต่คือวิญญาณของคนงานเหมืองที่ถูกทิ้งให้ตายทั้งเป็นและกลับมาทวงสัญญาจากลูกหลาน',
-                        ending: 'ในคืนที่พายุรุนแรงที่สุด สารวัตรตัดสินใจระเบิดปากถ้ำเหมืองเก่าเพื่อปิดผนึกอีกครั้ง แม้จะต้องแลกกับการติดอยู่ข้างใน แต่ในวินาทีสุดท้ายชาวบ้านทุกคนร่วมมือกันดึงเขากลับขึ้นมาได้ทัน ฉากจบเผยให้เห็นว่าเสียงกระซิบในสายฝนยังคงดังขึ้นเบาๆ ทุกครั้งที่ฝนตกหนัก เป็นสัญลักษณ์ของความผิดบาปที่ไม่มีวันถูกลืม'
-                    },
-                    gossipQuote: '“บรรยากาศฝนตกกับแสงไฟฉายในป่าคือหลอนจัด! ตอนเฉลยว่าทั้งหมู่บ้านร่วมมือกันปกปิดเรื่องเหมืองร้างเมื่อ 30 ปีก่อนคือหักมุมแบบอึ้งไปเลย”'
+                        ending: 'ในคืนที่พายุรุนแรงที่สุด สารวัตรตัดสินใจระเบิดปากถ้ำเหมืองเก่าเพื่อปิดผนึกอีกครั้ง แม้จะต้องแลกกับการติดอยู่ข้างใน แต่ในวินาทีสุดท้ายชาวบ้านทุกคนร่วมมือกันดึงเขากลับขึ้นมาได้ทัน ฉากจบเผยให้เห็นว่าเสียงกระซิบในสายฝนยังคงดังขึ้นเบาๆ ทุกครั้งที่ฝนตกหนัก เป็นสัญลักษณ์ของความผิดบาปที่ไม่มีวันถูกลืม',
+                        gossip_quote: '“บรรยากาศฝนตกกับแสงไฟฉายในป่าคือหลอนจัด! ตอนเฉลยว่าทั้งหมู่บ้านร่วมมือกันปกปิดเรื่องเหมืองร้างเมื่อ 30 ปีก่อนคือหักมุมแบบอึ้งไปเลย”'
+                    }
                 },
                 {
                     id: 'mv-01',
                     title: 'Exhuma: ขุดมันขึ้นมาจากหลุม',
                     platform: 'Netflix',
                     genre: 'สยองขวัญ / ลึกลับ',
-                    year: 2024,
-                    runtimeMinutes: 134,
-                    wordCount: 420, // Used in formula: Math.ceil(wordCount / 220) = 2 mins
-                    gossipScore: '9.8/10',
-                    featured: false,
-                    hook: 'หมอผีวัยรุ่นและซินแสฮวงจุ้ยรับงานย้ายหลุมศพมหาเศรษฐี แต่กลับปลุกปีศาจซามูไรยักษ์ที่ถูกฝังไว้เพื่อสะกดอาถรรพ์แผ่นดินเกาหลี',
+                    release_year: 2024,
+                    runtime_minutes: 134,
+                    word_count: 420,
+                    gossip_score: '9.8/10',
+                    is_featured: false,
+                    hook_summary: 'หมอผีวัยรุ่นและซินแสฮวงจุ้ยรับงานย้ายหลุมศพมหาเศรษฐี แต่กลับปลุกปีศาจซามูไรยักษ์ที่ถูกฝังไว้เพื่อสะกดอาถรรพ์แผ่นดินเกาหลี',
+                    poster_svg: FALLBACK_POSTERS['mv-01'],
                     spoilers: {
                         overview: 'ครอบครัวเศรษฐีเกาหลีในอเมริกาเจอคำสาปประหลาดเล่นงานเด็กทารก จึงจ้าง "ฮวาริม" หมอผีสาวและ "ซังด็อก" ซินแสฮวงจุ้ยมาขุดย้ายหลุมศพบรรพบุรุษบนภูเขาเปลี่ยว แต่เมื่อขุดลงไปกลับพบโลงศพซ้อนโลงศพ และปลดปล่อยวิญญาณร้ายระดับปีศาจสงครามญี่ปุ่นออกมาอาละวาด',
                         detailed: 'ครึ่งแรกเป็นเรื่องของวิญญาณปู่ที่กลับมาฆ่าลูกหลานตัวเองเพราะโกรธที่ถูกฝังในที่อัปมงคล แต่พอเผาศพปู่จบ เรื่องกลับหักมุมเข้าสู่ครึ่งหลัง! ซินแสพบว่าใต้โลงศพปู่มีโลงศพแนวตั้งขนาดยักษ์ฝังอยู่ ข้างในคือ "โอนิ" (ยักษ์ซามูไรญี่ปุ่นสมัยสงคราม) ที่ถูกพระญี่ปุ่นใช้เป็นหมุดอาถรรพ์ตอกสะกดเส้นเลือดมังกรของเกาหลีเอาไว้ การขุดโลงปู่ออกทำให้หมุดอาถรรพ์คลายตัว ปีศาจยักษ์จึงออกมาไล่ฆ่าทุกคนที่เกี่ยวข้อง',
-                        ending: 'ซินแสซังด็อกวิเคราะห์หลักธาตุทั้ง 5 (ไม้ ไฟ ดิน ทอง น้ำ) และพบว่าปีศาจยักษ์มีธาตุเหล็ก (ดาบซามูไร) จึงต้องใช้ "ไม้เปียกน้ำ" มาข่ม เขาใช้เสียมเปื้อนเลือดของตัวเองฟาดเข้าที่กลางลำตัวของยักษ์จนสลายไป ทุกคนรอดชีวิตแต่บอบช้ำหนัก ฉากจบคือทุกคนมาร่วมงานแต่งลูกสาวซินแสอย่างเรียบง่าย ทิ้งปมเรื่องรอยแผลเป็นทางประวัติศาสตร์ระหว่างเกาหลี-ญี่ปุ่น'
-                    },
-                    gossipQuote: '“เอาจริงนะ หนังมันแบ่งเป็น 2 พาร์ทชัดเจนมาก ครึ่งแรกนึกว่าผีบรรพบุรุษทั่วไป แต่พอเฉลยว่ามีโลงซ้อนโลงเป็นยักษ์ซามูไรญี่ปุ่นที่ฝังสะกดฮวงจุ้ยประเทศเท่านั้นแหละ ขนลุกเลย!”'
+                        ending: 'ซินแสซังด็อกวิเคราะห์หลักธาตุทั้ง 5 (ไม้ ไฟ ดิน ทอง น้ำ) และพบว่าปีศาจยักษ์มีธาตุเหล็ก (ดาบซามูไร) จึงต้องใช้ "ไม้เปียกน้ำ" มาข่ม เขาใช้เสียมเปื้อนเลือดของตัวเองฟาดเข้าที่กลางลำตัวของยักษ์จนสลายไป ทุกคนรอดชีวิตแต่บอบช้ำหนัก ฉากจบคือทุกคนมาร่วมงานแต่งลูกสาวซินแสอย่างเรียบง่าย ทิ้งปมเรื่องรอยแผลเป็นทางประวัติศาสตร์ระหว่างเกาหลี-ญี่ปุ่น',
+                        gossip_quote: '“เอาจริงนะ หนังมันแบ่งเป็น 2 พาร์ทชัดเจนมาก ครึ่งแรกนึกว่าผีบรรพบุรุษทั่วไป แต่พอเฉลยว่ามีโลงซ้อนโลงเป็นยักษ์ซามูไรญี่ปุ่นที่ฝังสะกดฮวงจุ้ยประเทศเท่านั้นแหละ ขนลุกเลย!”'
+                    }
                 },
                 {
                     id: 'mv-02',
                     title: 'Dune: Part Two (ดูน ภาค 2)',
                     platform: 'HBO Max',
                     genre: 'ไซไฟ / มหากาพย์',
-                    year: 2024,
-                    runtimeMinutes: 166,
-                    wordCount: 610, // ~3 mins
-                    gossipScore: '9.5/10',
-                    featured: false,
-                    hook: 'พอล อะเทรดีส ผนึกกำลังกับชาวเฟรเมนกลางทะเลทราย เพื่อล้างแค้นตระกูลฮาร์คอนเนน แต่พลังหยั่งรู้อนาคตกำลังเปลี่ยนเขาให้กลายเป็นผู้นำจอมเผด็จการ',
+                    release_year: 2024,
+                    runtime_minutes: 166,
+                    word_count: 610,
+                    gossip_score: '9.5/10',
+                    is_featured: false,
+                    hook_summary: 'พอล อะเทรดีส ผนึกกำลังกับชาวเฟรเมนกลางทะเลทราย เพื่อล้างแค้นตระกูลฮาร์คอนเนน แต่พลังหยั่งรู้อนาคตกำลังเปลี่ยนเขาให้กลายเป็นผู้นำจอมเผด็จการ',
+                    poster_svg: FALLBACK_POSTERS['mv-02'],
                     spoilers: {
                         overview: 'พอล อะเทรดีส รอดชีวิตจากการล้างบางตระกูล และเข้าเป็นส่วนหนึ่งของชนเผ่าเฟรเมน เรียนรู้การขี่หนอนทรายยักษ์ พร้อมพบรักกับ ชานี แต่เมื่อเขาดื่ม "น้ำแห่งชีวิต" เพื่อปลุกพลังญาณทิพย์ เขากลับมองเห็นอนาคตที่จะนำไปสู่สงครามศักดิ์สิทธิ์ที่คร่าชีวิตคนนับพันล้าน',
                         detailed: 'พอลพยายามหลีกเลี่ยงการเป็น "ลิซาน อัล-ไกบ์" (ผู้มาโปรดตามคำทำนาย) เพราะรู้ดีว่าคำทำนายนี้ถูกกลุ่มเบเน เจสเซริต สร้างขึ้นเพื่อควบคุมผู้คน แต่หลังจากตระกูลฮาร์คอนเนนส่งจอมโหด "เฟย์ด-รอธา" มาถล่มฐานทัพชาวเฟรเมน พอลไม่มีทางเลือกจึงเดินทางลงใต้ ดื่มน้ำพิษจากหนอนทรายจนรอดตายและปลุกพลังหยั่งรู้สมบูรณ์แบบ ทำให้เขารู้ความลับว่าตัวเองมีสายเลือดฮาร์คอนเนนอยู่ในตัวด้วย!',
-                        ending: 'พอลนำกองทัพเฟรเมนขี่หนอนทรายบุกถล่มกองทัพจักรพรรดิกลางเมืองหลวง พอลดวลมีดตัวต่อตัวชนะเฟย์ด-รอธา และบังคับให้จักรพรรดิสละบัลลังก์ พร้อมประกาศแต่งงานกับเจ้าหญิงอิรูลานเพื่อความชอบธรรมทางการเมือง ทำให้ "ชานี" คนรักของเขาเสียใจและขี่หนอนทรายหนีไปคนเดียว ฉากสุดท้ายพอลสั่งกองทัพเปิดฉากสงครามศักดิ์สิทธิ์ถล่มตระกูลใหญ่ทั่วจักรวาล'
-                    },
-                    gossipQuote: '“งานภาพคือที่สุดของปี แต่เจ็บปวดตรงตอนจบที่พอลยอมทิ้งชานีเพื่อไปแต่งงานการเมืองกับลูกสาวจักรพรรดิ กลายเป็นผู้นำที่น่ากลัวกว่าตัวร้ายภาคแรกอีก”'
+                        ending: 'พอลนำกองทัพเฟรเมนขี่หนอนทรายบุกถล่มกองทัพจักรพรรดิกลางเมืองหลวง พอลดวลมีดตัวต่อตัวชนะเฟย์ด-รอธา และบังคับให้จักรพรรดิสละบัลลังก์ พร้อมประกาศแต่งงานกับเจ้าหญิงอิรูลานเพื่อความชอบธรรมทางการเมือง ทำให้ "ชานี" คนรักของเขาเสียใจและขี่หนอนทรายหนีไปคนเดียว ฉากสุดท้ายพอลสั่งกองทัพเปิดฉากสงครามศักดิ์สิทธิ์ถล่มตระกูลใหญ่ทั่วจักรวาล',
+                        gossip_quote: '“งานภาพคือที่สุดของปี แต่เจ็บปวดตรงตอนจบที่พอลยอมทิ้งชานีเพื่อไปแต่งงานการเมืองกับลูกสาวจักรพรรดิ กลายเป็นผู้นำที่น่ากลัวกว่าตัวร้ายภาคแรกอีก”'
+                    }
                 },
                 {
                     id: 'mv-03',
                     title: 'Inside Out 2 (มหัศจรรย์อารมณ์อลเวง 2)',
                     platform: 'Disney+',
                     genre: 'แอนิเมชัน / ครอบครัว',
-                    year: 2024,
-                    runtimeMinutes: 96,
-                    wordCount: 380, // ~2 mins
-                    gossipScore: '9.6/10',
-                    featured: false,
-                    hook: 'ไรลีย์เข้าสู่วัยรุ่นเต็มตัว ศูนย์บัญชาการในหัวถูกทุบทิ้งพร้อมการมาถึงของอารมณ์ชุดใหม่ นำทีมโดย "ว้าวุ่น" ที่ยึดอำนาจและจับอารมณ์เดิมขังคุก',
+                    release_year: 2024,
+                    runtime_minutes: 96,
+                    word_count: 380,
+                    gossip_score: '9.6/10',
+                    is_featured: false,
+                    hook_summary: 'ไรลีย์เข้าสู่วัยรุ่นเต็มตัว ศูนย์บัญชาการในหัวถูกทุบทิ้งพร้อมการมาถึงของอารมณ์ชุดใหม่ นำทีมโดย "ว้าวุ่น" ที่ยึดอำนาจและจับอารมณ์เดิมขังคุก',
+                    poster_svg: FALLBACK_POSTERS['mv-03'],
                     spoilers: {
                         overview: 'ไรลีย์อายุ 13 ปี และกำลังจะเข้าค่ายฝึกฮอกกี้น้ำแข็งเพื่อเข้าทีมโรงเรียนมัธยม จู่ๆ สัญญาณ "วัยว้าวุ่น" ก็ดังขึ้น พร้อมการมาของ 4 อารมณ์ใหม่ ได้แก่ ว้าวุ่น (Anxiety), อิจฉา (Envy), อายม้วน (Embarrassment) และ เฉยชิล (Ennui)',
                         detailed: 'ว้าวุ่นมองว่า ลั้ลลา (Joy) มองโลกในแง่ดีเกินไปไม่เหมาะกับวัยรุ่น จึงจับอารมณ์ดั้งเดิมทั้ง 5 ขังไว้ในโหลแก้วใต้จิตสำนึก แล้วโยน "ตัวตนหลัก" (Sense of Self) อันเดิมของไรลีย์ทิ้งไป ว้าวุ่นพยายามปั้นตัวตนใหม่ให้ไรลีย์ด้วยการบังคับให้เธอตีตัวออกห่างเพื่อนสนิท ไปประจบพวกนักกีฬารุ่นพี่ จนไรลีย์เครียดจัดและแอบเข้าไปขโมยสมุดโน้ตโค้ชตอนกลางคืน',
-                        ending: 'ระหว่างแข่งนัดสำคัญ ว้าวุ่นควบคุมแผงควบคุมเร็วเกินไปจนเกิดเป็นพายุหมุนสีส้ม ทำให้ไรลีย์เกิดอาการ "Panic Attack" (แพนิกกำเริบ) กลางสนาม ลั้ลลาและเพื่อนๆ ฝ่ากลับมาได้และช่วยดึงมือว้าวุ่นออกจากแผงควบคุม ทุกคนยอมรับว่าเราไม่สามารถเลือกเก็บเฉพาะความทรงจำดีๆ ได้ แต่ต้องให้ทุกความทรงจำทั้งสุข เศร้า อาย และกังวล หล่อหลอมเป็นตัวตนของไรลีย์ในแบบที่สมบูรณ์'
-                    },
-                    gossipQuote: '“ฉากที่น้องว้าวุ่นกดปุ่มรัวๆ จนเกิดพายุสีส้มในหัว แล้วไรลีย์แพนิกกำเริบกลางสนามฮอกกี้คือเรียลมาก ใครเคยเป็นแพนิกดูฉากนี้มีน้ำตาซึมแน่นอน”'
+                        ending: 'ระหว่างแข่งนัดสำคัญ ว้าวุ่นควบคุมแผงควบคุมเร็วเกินไปจนเกิดเป็นพายุหมุนสีส้ม ทำให้ไรลีย์เกิดอาการ "Panic Attack" (แพนิกกำเริบ) กลางสนาม ลั้ลลาและเพื่อนๆ ฝ่ากลับมาได้และช่วยดึงมือว้าวุ่นออกจากแผงควบคุม ทุกคนยอมรับว่าเราไม่สามารถเลือกเก็บเฉพาะความทรงจำดีๆ ได้ แต่ต้องให้ทุกความทรงจำทั้งสุข เศร้า อาย และกังวล หล่อหลอมเป็นตัวตนของไรลีย์ในแบบที่สมบูรณ์',
+                        gossip_quote: '“ฉากที่น้องว้าวุ่นกดปุ่มรัวๆ จนเกิดพายุสีส้มในหัว แล้วไรลีย์แพนิกกำเริบกลางสนามฮอกกี้คือเรียลมาก ใครเคยเป็นแพนิกดูฉากนี้มีน้ำตาซึมแน่นอน”'
+                    }
                 },
                 {
                     id: 'mv-04',
                     title: 'Parasite (ชนชั้นปรสิต)',
                     platform: 'Netflix',
                     genre: 'ดราม่า / ตลกร้าย',
-                    year: 2019,
-                    runtimeMinutes: 132,
-                    wordCount: 430, // ~2 mins
-                    gossipScore: '9.9/10',
-                    featured: false,
-                    hook: 'ครอบครัวฐานะยากจนในห้องเช่ากึ่งใต้ดิน วางแผนแทรกซึมเข้าไปทำงานในคฤหาสน์หรูของมหาเศรษฐีทีละคน จนกระทั่งค้นพบความลับสุดสยองที่ซ่อนอยู่ใต้บ้าน',
+                    release_year: 2019,
+                    runtime_minutes: 132,
+                    word_count: 430,
+                    gossip_score: '9.9/10',
+                    is_featured: false,
+                    hook_summary: 'ครอบครัวฐานะยากจนในห้องเช่ากึ่งใต้ดิน วางแผนแทรกซึมเข้าไปทำงานในคฤหาสน์หรูของมหาเศรษฐีทีละคน จนกระทั่งค้นพบความลับสุดสยองที่ซ่อนอยู่ใต้บ้าน',
+                    poster_svg: FALLBACK_POSTERS['mv-04'],
                     spoilers: {
                         overview: 'ครอบครัวคิมที่ตกงานยกบ้าน ใช้เล่ห์เหลี่ยมปลอมประวัติและใส่ร้ายคนเก่า เพื่อแทรกซึมเข้าไปเป็นติวเตอร์ ครูสอนศิลปะ คนขับรถ และแม่บ้าน ให้กับครอบครัวพัคผู้ร่ำรวยและไร้เดียงสา โดยปิดบังความสัมพันธ์ทางสายเลือดเอาไว้',
                         detailed: 'คืนหนึ่งที่เจ้าของบ้านไม่อยู่ ครอบครัวคิมแอบจัดปาร์ตี้ดื่มเหล้าในคฤหาสน์ แต่ "มุนกวาง" แม่บ้านคนเก่าที่ถูกไล่ออกไปกลับมากดกริ่งกลางสายฝน และเปิดเผยความลับว่าใต้ห้องครัวมี "บังเกอร์หลบภัยลับ" ที่เธอแอบซ่อนสามีผู้ล้มละลายไว้นานถึง 4 ปี เมื่อแม่บ้านคนเก่าจับได้ว่าครอบครัวคิมเป็นพวกเดียวกัน ทั้งสองฝ่ายจึงเกิดการต่อสู้แย่งชิงอำนาจกันเอง',
-                        ending: 'เจ้าของบ้านกลับมากะทันหัน ครอบครัวคิมต้องหนีตายกลับบ้านกึ่งใต้ดินที่ถูกน้ำท่วมมิดหัว วันรุ่งขึ้นในงานวันเกิดลูกชายเศรษฐี สามีของแม่บ้านคนเก่าหลุดออกมาจากบังเกอร์พร้อมมีด ไล่แทงลูกสาวครอบครัวคิมจนเสียชีวิต พ่อของครอบครัวคิมทนไม่ไหวที่เห็นเจ้านายเศรษฐีทำท่ารังเกียจ "กลิ่นคนจน" จึงคว้ามีดแทงเจ้านายตาย แล้วหนีลงไปซ่อนตัวในบังเกอร์ลับแทน ฉากจบคือลูกชายสัญญาว่าจะทำงานเก็บเงินซื้อบ้านหลังนี้เพื่อปลดปล่อยพ่อออกมา (ซึ่งเป็นไปไม่ได้เลยในความจริง)'
-                    },
-                    gossipQuote: '“จุดพีคของเรื่องไม่ใช่แค่ตอนเจอคนซ่อนในห้องใต้ดินนะ แต่เป็นตอนที่เจ้านายเศรษฐีบีบจมูกเพราะรังเกียจกลิ่นคนจน นั่นแหละฟางเส้นสุดท้ายที่ทำให้เกิดโศกนาฏกรรม”'
+                        ending: 'เจ้าของบ้านกลับมากะทันหัน ครอบครัวคิมต้องหนีตายกลับบ้านกึ่งใต้ดินที่ถูกน้ำท่วมมิดหัว วันรุ่งขึ้นในงานวันเกิดลูกชายเศรษฐี สามีของแม่บ้านคนเก่าหลุดออกมาจากบังเกอร์พร้อมมีด ไล่แทงลูกสาวครอบครัวคิมจนเสียชีวิต พ่อของครอบครัวคิมทนไม่ไหวที่เห็นเจ้านายเศรษฐีทำท่ารังเกียจ "กลิ่นคนจน" จึงคว้ามีดแทงเจ้านายตาย แล้วหนีลงไปซ่อนตัวในบังเกอร์ลับแทน ฉากจบคือลูกชายสัญญาว่าจะทำงานเก็บเงินซื้อบ้านหลังนี้เพื่อปลดปล่อยพ่อออกมา (ซึ่งเป็นไปไม่ได้เลยในความจริง)',
+                        gossip_quote: '“จุดพีคของเรื่องไม่ใช่แค่ตอนเจอคนซ่อนในห้องใต้ดินนะ แต่เป็นตอนที่เจ้านายเศรษฐีบีบจมูกเพราะรังเกียจกลิ่นคนจน นั่นแหละฟางเส้นสุดท้ายที่ทำให้เกิดโศกนาฏกรรม”'
+                    }
                 },
                 {
                     id: 'mv-05',
                     title: 'The Boys (ก๊วนหนุ่มซ่าล่าซูเปอร์ฮีโร่ - SS4)',
                     platform: 'Prime Video',
                     genre: 'แอ็กชัน / เสียดสี',
-                    year: 2024,
-                    runtimeMinutes: 480,
-                    wordCount: 640, // ~3 mins
-                    gossipScore: '9.3/10',
-                    featured: false,
-                    hook: 'เมื่อซูเปอร์ฮีโร่ไม่ได้แสนดีอย่างที่ออกสื่อ แต่คือเซเลบจอมคลั่งอำนาจ กลุ่มคนธรรมดาจึงต้องงัดทุกวิธีสกปรกเพื่อโค่นล้ม โฮมแลนเดอร์ ก่อนจะสายเกินไป',
+                    release_year: 2024,
+                    runtime_minutes: 480,
+                    word_count: 640,
+                    gossip_score: '9.3/10',
+                    is_featured: false,
+                    hook_summary: 'เมื่อซูเปอร์ฮีโร่ไม่ได้แสนดีอย่างที่ออกสื่อ แต่คือเซเลบจอมคลั่งอำนาจ กลุ่มคนธรรมดาจึงต้องงัดทุกวิธีสกปรกเพื่อโค่นล้ม โฮมแลนเดอร์ ก่อนจะสายเกินไป',
+                    poster_svg: FALLBACK_POSTERS['mv-05'],
                     spoilers: {
                         overview: 'โฮมแลนเดอร์ ซูเปอร์ฮีโร่ที่ทรงพลังที่สุดในโลก เริ่มเบื่อหน่ายการแสร้งทำตัวเป็นคนดี และวางแผนยึดอำนาจทางการเมืองร่วมกับ "ซิสเตอร์ เซจ" ฮีโร่ที่ฉลาดที่สุดในโลก ขณะที่ บิลลี่ บุตเชอร์ กำลังจะตายเพราะผลข้างเคียงของเซรุ่มซูเปอร์ฮีโร่ชั่วคราว',
                         detailed: 'ทีม The Boys พยายามตามหาไวรัสที่สามารถฆ่าซูเปอร์ฮีโร่ได้ แต่บุตเชอร์กลับเห็นภาพหลอนของอดีตเพื่อนร่วมทีมและมีปรสิตกลายพันธุ์อยู่ในสมอง ทางฝั่งโฮมแลนเดอร์ก็ปั่นกระแสสังคมให้คนธรรมดาเกลียดชังกันเอง พร้อมบีบให้ลูกชาย (ไรอัน) ยอมรับด้านมืดของตัวเอง จนเกิดเหตุการณ์ที่ไรอันเผลอฆ่าคนโดยไม่ได้ตั้งใจ',
-                        ending: 'แผนการลับของ ซิสเตอร์ เซจ สำเร็จลุล่วง ประธานาธิบดีถูกลอบสังหารและป้ายความผิดให้กลุ่มฮีโร่ฝ่ายตรงข้าม ทำให้รองประธานาธิบดีขึ้นเป็นผู้นำและประกาศกฎอัยการศึก ยกอำนาจควบคุมกองทัพทั้งหมดให้โฮมแลนเดอร์ บุตเชอร์ยอมปล่อยให้ปรสิตในตัวควบคุมร่าง ฉีกกระชากร่างรองประธานาธิบดีขาดครึ่งและชิงไวรัสฆ่าฮีโร่หนีไป ขณะที่สมาชิกทีม The Boys คนอื่นๆ ถูกกองทัพฮีโร่บุกจับกุมทั้งหมด'
-                    },
-                    gossipQuote: '“ซีซันนี้โฮมแลนเดอร์ไม่ต้องลงมือเองเลย แค่ใช้สมองของซิสเตอร์ เซจ วางหมากการเมือง จนตอนจบฮีโร่ยึดประเทศได้แบบถูกกฎหมาย โคตรสิ้นหวัง!”'
+                        ending: 'แผนการลับของ ซิสเตอร์ เซจ สำเร็จลุล่วง ประธานาธิบดีถูกลอบสังหารและป้ายความผิดให้กลุ่มฮีโร่ฝ่ายตรงข้าม ทำให้รองประธานาธิบดีขึ้นเป็นผู้นำและประกาศกฎอัยการศึก ยกอำนาจควบคุมกองทัพทั้งหมดให้โฮมแลนเดอร์ บุตเชอร์ยอมปล่อยให้ปรสิตในตัวควบคุมร่าง ฉีกกระชากร่างรองประธานาธิบดีขาดครึ่งและชิงไวรัสฆ่าฮีโร่หนีไป ขณะที่สมาชิกทีม The Boys คนอื่นๆ ถูกกองทัพฮีโร่บุกจับกุมทั้งหมด',
+                        gossip_quote: '“ซีซันนี้โฮมแลนเดอร์ไม่ต้องลงมือเองเลย แค่ใช้สมองของซิสเตอร์ เซจ วางหมากการเมือง จนตอนจบฮีโร่ยึดประเทศได้แบบถูกกฎหมาย โคตรสิ้นหวัง!”'
+                    }
                 },
                 {
                     id: 'mv-06',
                     title: 'Anatomy of a Fall (เขาบอกว่าเธอฆ่า)',
                     platform: 'Prime Video',
                     genre: 'สืบสวน / ดราม่าศาล',
-                    year: 2023,
-                    runtimeMinutes: 152,
-                    wordCount: 410, // ~2 mins
-                    gossipScore: '9.4/10',
-                    featured: false,
-                    hook: 'สามีพลัดตกจากชั้นสามของบ้านพักกลางหิมะเสียชีวิต มีเพียงภรรยาและลูกชายตาบอดอยู่ในบ้าน เธอคือฆาตกรเลือดเย็น หรือเขาฆ่าตัวตายกันแน่?',
+                    release_year: 2023,
+                    runtime_minutes: 152,
+                    word_count: 410,
+                    gossip_score: '9.4/10',
+                    is_featured: false,
+                    hook_summary: 'สามีพลัดตกจากชั้นสามของบ้านพักกลางหิมะเสียชีวิต มีเพียงภรรยาและลูกชายตาบอดอยู่ในบ้าน เธอคือฆาตกรเลือดเย็น หรือเขาฆ่าตัวตายกันแน่?',
+                    poster_svg: FALLBACK_POSTERS['mv-06'],
                     spoilers: {
                         overview: 'ซานดรา นักเขียนสาวชาวเยอรมัน ถูกฟ้องข้อหาฆาตกรรม ซามูเอล สามีชาวฝรั่งเศสที่ตกจากหน้าต่างห้องใต้หลังคาลงมาเสียชีวิต โดยมี "ดาเนียล" ลูกชายวัย 11 ปีที่พิการทางสายตาเป็นพยานปากสำคัญเพียงคนเดียว',
                         detailed: 'ในชั้นศาล อัยการขุดคุ้ยชีวิตคู่ที่พังทลายของทั้งสองคน ทั้งเรื่องที่ซานดรานอกใจ และเรื่องที่ซามูเอลโทษว่าเธอเป็นต้นเหตุทำให้ลูกชายประสบอุบัติเหตุตาบอด จนกระทั่งศาลเปิด "คลิปเสียง" ที่ซามูเอลแอบอัดไว้ก่อนตายหนึ่งวัน เผยให้เห็นการทะเลาะกันอย่างรุนแรงจนถึงขั้นลงไม้ลงมือ ทำให้ซานดราตกเป็นผู้ต้องสงสัยเต็มตัว',
-                        ending: 'ดาเนียล ลูกชายขอให้การต่อศาลอีกครั้ง โดยเล่าเหตุการณ์ในอดีตที่หมาของเขากินยาแก้ปวดเกินขนาดจนเกือบตาย ซึ่งตรงกับตัวยาที่พบในตัวพ่อ ทำให้เชื่อได้ว่าพ่อเคยพยายามฆ่าตัวตายมาก่อนหน้านี้แล้ว ศาลจึงตัดสินยกฟ้องให้ซานดราพ้นผิด แต่หนังจงใจทิ้งความคลุมเครือไว้จนวินาทีสุดท้ายว่าจริงๆ แล้วเธอผลักเขาหรือไม่'
-                    },
-                    gossipQuote: '“หนังเรื่องนี้ทำให้เรารู้เลยว่า เวลาขึ้นศาล ‘ความจริง’ ไม่สำคัญเท่า ‘เรื่องเล่าที่น่าเชื่อถือที่สุด’ ฉากเปิดคลิปเสียงทะเลาะกันคือตึงเครียดจนลืมหายใจ”'
+                        ending: 'ดาเนียล ลูกชายขอให้การต่อศาลอีกครั้ง โดยเล่าเหตุการณ์ในอดีตที่หมาของเขากินยาแก้ปวดเกินขนาดจนเกือบตาย ซึ่งตรงกับตัวยาที่พบในตัวพ่อ ทำให้เชื่อได้ว่าพ่อเคยพยายามฆ่าตัวตายมาก่อนหน้านี้แล้ว ศาลจึงตัดสินยกฟ้องให้ซานดราพ้นผิด แต่หนังจงใจทิ้งความคลุมเครือไว้จนวินาทีสุดท้ายว่าจริงๆ แล้วเธอผลักเขาหรือไม่',
+                        gossip_quote: '“หนังเรื่องนี้ทำให้เรารู้เลยว่า เวลาขึ้นศาล ‘ความจริง’ ไม่สำคัญเท่า ‘เรื่องเล่าที่น่าเชื่อถือที่สุด’ ฉากเปิดคลิปเสียงทะเลาะกันคือตึงเครียดจนลืมหายใจ”'
+                    }
                 }
             ];
 
             /* ------------------------------------------------------------------
-               2. APPLICATION STATE & STORAGE KEYS
+               2. APPLICATION STATE & STORAGE
                ------------------------------------------------------------------ */
             const STORAGE_KEY_READ_IDS = 'spoilerbox_read_movie_ids_v1';
 
             let state = {
+                movies: [],
+                spoilersCache: {}, // เก็บข้อมูลสปอยที่ดึงจาก Supabase เพื่อลดการยิงซ้ำ
+                user: null,
+                crmProfile: null,
+                isSignUpMode: false,
                 searchQuery: '',
                 selectedPlatform: 'ALL',
                 selectedTimeFilter: 'ALL',
                 isErrorSimulated: false,
-                readMovieIds: loadReadHistory(),
+                readMovieIds: loadLocalReadHistory(),
                 activeModalMovieId: null,
                 activeModalDepth: 'overview'
             };
 
-            function loadReadHistory() {
+            function loadLocalReadHistory() {
                 try {
                     const saved = localStorage.getItem(STORAGE_KEY_READ_IDS);
                     return saved ? JSON.parse(saved) : [];
@@ -1479,37 +1436,24 @@
                 }
             }
 
-            function saveReadHistory() {
+            function saveLocalReadHistory() {
                 try {
                     localStorage.setItem(STORAGE_KEY_READ_IDS, JSON.stringify(state.readMovieIds));
-                } catch (e) {
-                    // Fail silently if localStorage is blocked
-                }
+                } catch (e) {}
             }
 
             /* ------------------------------------------------------------------
                3. RULES & CALCULATION FORMULAS
                ------------------------------------------------------------------ */
-            /**
-             * สูตรคำนวณเวลาอ่านจริง (Reading Time Formula):
-             * อัตราการอ่านภาษาไทยเฉลี่ย ~220 คำ/นาที (ปัดขึ้นเป็นจำนวนเต็ม)
-             */
             function calculateReadMinutes(wordCount) {
                 return Math.max(1, Math.ceil(wordCount / 220));
             }
 
-            /**
-             * สูตรคำนวณเวลาชีวิตที่ประหยัดได้ (Time Saved Formula):
-             * SavedTime = RuntimeMinutes - ReadMinutes
-             */
             function calculateSavedMinutes(movie) {
-                const readMins = calculateReadMinutes(movie.wordCount);
-                return Math.max(0, movie.runtimeMinutes - readMins);
+                const readMins = calculateReadMinutes(movie.word_count);
+                return Math.max(0, movie.runtime_minutes - readMins);
             }
 
-            /**
-             * แปลงนาทีเป็นข้อความอ่านง่าย (เช่น "4 ชม. 15 นาที")
-             */
             function formatDurationThai(totalMinutes) {
                 if (totalMinutes <= 0) return '0 นาที';
                 const hours = Math.floor(totalMinutes / 60);
@@ -1524,6 +1468,7 @@
                ------------------------------------------------------------------ */
             const els = {
                 brandLogo: document.getElementById('brandLogo'),
+                dbStatusBadge: document.getElementById('dbStatusBadge'),
                 homeView: document.getElementById('homeView'),
                 readerPage: document.getElementById('readerPage'),
                 btnBackHome: document.getElementById('btnBackHome'),
@@ -1539,7 +1484,7 @@
                 btnSimulateError: document.getElementById('btnSimulateError'),
                 btnResetFilters: document.getElementById('btnResetFilters'),
                 btnRetryLoad: document.getElementById('btnRetryLoad'),
-                // Full-Page Reader Elements
+                // Reader Page
                 readerPosterBox: document.getElementById('readerPosterBox'),
                 readerPlatformBadge: document.getElementById('readerPlatformBadge'),
                 readerMovieTitle: document.getElementById('readerMovieTitle'),
@@ -1553,43 +1498,190 @@
                 btnCopyGossip: document.getElementById('btnCopyGossip'),
                 readerSavedNote: document.getElementById('readerSavedNote'),
                 btnMarkAsRead: document.getElementById('btnMarkAsRead'),
+                // Auth Modal
+                btnCrmAuth: document.getElementById('btnCrmAuth'),
+                crmAuthText: document.getElementById('crmAuthText'),
+                authModal: document.getElementById('authModal'),
+                btnCloseAuthModal: document.getElementById('btnCloseAuthModal'),
+                authModalTitle: document.getElementById('authModalTitle'),
+                authForm: document.getElementById('authForm'),
+                authEmail: document.getElementById('authEmail'),
+                authPassword: document.getElementById('authPassword'),
+                btnSubmitAuth: document.getElementById('btnSubmitAuth'),
+                authSwitchPrompt: document.getElementById('authSwitchPrompt'),
+                btnToggleAuthMode: document.getElementById('btnToggleAuthMode'),
                 toast: document.getElementById('toastNotification')
             };
 
             /* ------------------------------------------------------------------
+               5. SUPABASE DATA & CRM TRANSACTION SERVICE
+               ------------------------------------------------------------------ */
+            async function initDatabaseAndAuth() {
+                if (!supabaseClient) {
+                    // Fallback Mode: ยังไม่ได้ใส่ API Key ของ Supabase
+                    state.movies = FALLBACK_MOVIES;
+                    FALLBACK_MOVIES.forEach(m => { state.spoilersCache[m.id] = m.spoilers; });
+                    els.dbStatusBadge.innerHTML = '🟡 โหมดออฟไลน์ (ใส่ Supabase Key เพื่อเปิดใช้งาน CRM)';
+                    updateSavedTimeDashboard();
+                    renderMovies();
+                    return;
+                }
+
+                els.dbStatusBadge.innerHTML = '🟢 เชื่อมต่อ Supabase Cloud แล้ว';
+
+                // 1. ตรวจสอบ Session สมาชิกปัจจุบัน
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session?.user) {
+                    await handleUserSignedIn(session.user);
+                }
+
+                // 2. ดึงรายชื่อหนังจากตาราง public.movies
+                const { data: moviesData, error } = await supabaseClient
+                    .from('movies')
+                    .select('*')
+                    .order('is_featured', { ascending: false })
+                    .order('created_at', { ascending: true });
+
+                if (error || !moviesData || moviesData.length === 0) {
+                    // หากยังไม่ได้รันไฟล์ SQL Seed ให้ใช้ข้อมูลสำรอง
+                    state.movies = FALLBACK_MOVIES;
+                    FALLBACK_MOVIES.forEach(m => { state.spoilersCache[m.id] = m.spoilers; });
+                } else {
+                    state.movies = moviesData;
+                }
+
+                updateSavedTimeDashboard();
+                renderMovies();
+            }
+
+            async function handleUserSignedIn(user) {
+                state.user = user;
+                // ดึงข้อมูล CRM Profile และประวัติการอ่านจาก Supabase
+                const [profileRes, txRes] = await Promise.all([
+                    supabaseClient.from('profiles').select('*').eq('id', user.id).single(),
+                    supabaseClient.from('reading_transactions').select('movie_id').eq('user_id', user.id)
+                ]);
+
+                if (profileRes.data) {
+                    state.crmProfile = profileRes.data;
+                }
+                if (txRes.data) {
+                    const cloudIds = txRes.data.map(row => row.movie_id);
+                    // รวมประวัติในเครื่องเข้ากับประวัติบน Cloud
+                    state.readMovieIds = Array.from(new Set([...state.readMovieIds, ...cloudIds]));
+                    saveLocalReadHistory();
+                }
+
+                updateCrmAuthHeaderUI();
+                updateSavedTimeDashboard();
+                renderMovies();
+            }
+
+            function updateCrmAuthHeaderUI() {
+                if (state.user) {
+                    const name = state.crmProfile?.display_name || state.user.email.split('@')[0];
+                    const segment = state.crmProfile?.crm_segment || 'MEMBER';
+                    els.btnCrmAuth.classList.add('logged-in');
+                    els.crmAuthText.innerHTML = `👤 ${name} <span class="crm-segment-tag">${segment}</span> (ออก)`;
+                } else {
+                    els.btnCrmAuth.classList.remove('logged-in');
+                    els.crmAuthText.textContent = 'เข้าสู่ระบบ / เก็บสถิติ CRM';
+                }
+            }
+
+            async function fetchMovieSpoilerContent(movieId) {
+                if (state.spoilersCache[movieId]) {
+                    return state.spoilersCache[movieId];
+                }
+
+                if (supabaseClient) {
+                    const { data, error } = await supabaseClient
+                        .from('movie_spoilers')
+                        .select('*')
+                        .eq('movie_id', movieId)
+                        .single();
+
+                    if (!error && data) {
+                        const formatted = {
+                            overview: data.overview_text,
+                            detailed: data.detailed_text,
+                            ending: data.ending_text,
+                            gossip_quote: data.gossip_quote
+                        };
+                        state.spoilersCache[movieId] = formatted;
+                        return formatted;
+                    }
+                }
+
+                const fallback = FALLBACK_MOVIES.find(m => m.id === movieId);
+                return fallback ? fallback.spoilers : null;
+            }
+
+            async function recordReadingTransaction(movie, savedMins) {
+                if (!supabaseClient || !state.user) return;
+
+                const { error } = await supabaseClient
+                    .from('reading_transactions')
+                    .insert({
+                        user_id: state.user.id,
+                        movie_id: movie.id,
+                        saved_minutes: savedMins,
+                        deepest_tab_read: state.activeModalDepth
+                    });
+
+                if (!error) {
+                    // อัปเดต CRM Profile ล่าสุดหลัง Trigger ทำงาน
+                    const { data } = await supabaseClient
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', state.user.id)
+                        .single();
+                    if (data) {
+                        state.crmProfile = data;
+                        updateCrmAuthHeaderUI();
+                    }
+                }
+            }
+
+            async function recordGossipCopyLog(movieId) {
+                if (!supabaseClient) return;
+                await supabaseClient.from('gossip_share_logs').insert({
+                    user_id: state.user ? state.user.id : null,
+                    movie_id: movieId,
+                    action_type: 'COPY_QUOTE'
+                });
+            }
+
+            /* ------------------------------------------------------------------
                6. PAGE NAVIGATION & INTERACTION HANDLERS
                ------------------------------------------------------------------ */
-            function openSpoilerPage(movieId, pushHash = true) {
-                const movie = MOVIES_DATA.find(m => m.id === movieId);
+            async function openSpoilerPage(movieId, pushHash = true) {
+                const movie = state.movies.find(m => m.id === movieId);
                 if (!movie) return;
 
                 state.activeModalMovieId = movieId;
                 state.activeModalDepth = 'overview';
 
-                const readMins = calculateReadMinutes(movie.wordCount);
+                const readMins = calculateReadMinutes(movie.word_count);
                 const savedMins = calculateSavedMinutes(movie);
                 const isRead = state.readMovieIds.includes(movie.id);
 
-                // Populate Full-Page Reader View
-                els.readerPosterBox.innerHTML = POSTER_SVGS[movie.id] || '';
+                els.readerPosterBox.innerHTML = movie.poster_svg || FALLBACK_POSTERS[movie.id] || '';
                 els.readerPlatformBadge.textContent = movie.platform;
                 els.readerPlatformBadge.setAttribute('data-platform', movie.platform);
                 els.readerMovieTitle.textContent = movie.title;
-                els.readerMovieMeta.textContent = `${movie.genre} • ปี ${movie.year}`;
-                els.readerMovieHook.textContent = movie.hook;
-                els.readerGossipScore.innerHTML = `ความน่าเม้าส์: <strong>${movie.gossipScore}</strong>`;
+                els.readerMovieMeta.textContent = `${movie.genre} • ปี ${movie.release_year}`;
+                els.readerMovieHook.textContent = movie.hook_summary;
+                els.readerGossipScore.innerHTML = `ความน่าเม้าส์: <strong>${movie.gossip_score}</strong>`;
                 els.readerTimeComparison.innerHTML = `
-                    <span class="original-time">ดูจริง ${movie.runtimeMinutes} นาที</span>
+                    <span class="original-time">ดูจริง ${movie.runtime_minutes} นาที</span>
                     <span class="arrow-right">→</span>
                     <span class="read-time">อ่านสรุป ${readMins} นาที</span>
                 `;
-                els.gossipQuoteText.textContent = movie.gossipQuote;
                 els.readerSavedNote.innerHTML = `อ่านจบเรื่องนี้ ประหยัดเวลาชีวิตไป <strong>${savedMins} นาที</strong>`;
 
                 updateReaderMarkButton(isRead, savedMins);
-                renderReaderDepthContent();
 
-                // Switch Page Views
                 els.homeView.style.display = 'none';
                 els.readerPage.classList.add('active');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1597,11 +1689,19 @@
                 if (pushHash) {
                     history.pushState({ movieId }, '', `#spoiler/${movieId}`);
                 }
+
+                // ดึงเนื้อหาสปอยจาก Database หรือ Cache
+                els.spoilerContentBox.innerHTML = '<p style="color: var(--text-secondary);">กำลังโหลดเนื้อหาสปอย...</p>';
+                const spoilerData = await fetchMovieSpoilerContent(movieId);
+                if (spoilerData) {
+                    els.gossipQuoteText.textContent = spoilerData.gossip_quote;
+                    renderReaderDepthContent();
+                }
             }
 
             function renderReaderDepthContent() {
-                const movie = MOVIES_DATA.find(m => m.id === state.activeModalMovieId);
-                if (!movie) return;
+                const spoilerData = state.spoilersCache[state.activeModalMovieId];
+                if (!spoilerData) return;
 
                 els.depthTabs.forEach(tab => {
                     tab.classList.toggle('active', tab.dataset.depth === state.activeModalDepth);
@@ -1615,7 +1715,7 @@
 
                 els.spoilerContentBox.innerHTML = `
                     <h4>${titlesMap[state.activeModalDepth]}</h4>
-                    <p>${movie.spoilers[state.activeModalDepth]}</p>
+                    <p>${spoilerData[state.activeModalDepth]}</p>
                 `;
             }
 
@@ -1643,38 +1743,35 @@
             function updateSavedTimeDashboard() {
                 let totalSaved = 0;
                 state.readMovieIds.forEach(id => {
-                    const movie = MOVIES_DATA.find(m => m.id === id);
+                    const movie = state.movies.find(m => m.id === id);
                     if (movie) {
                         totalSaved += calculateSavedMinutes(movie);
                     }
                 });
 
                 els.totalSavedDisplay.textContent = formatDurationThai(totalSaved);
-                // Toggle Disabled state for Reset button
                 els.btnResetStats.disabled = state.readMovieIds.length === 0;
             }
 
             function getFilteredMovies() {
-                return MOVIES_DATA.filter(movie => {
-                    // 1. Platform Filter
+                return state.movies.filter(movie => {
                     if (state.selectedPlatform !== 'ALL' && movie.platform !== state.selectedPlatform) {
                         return false;
                     }
 
-                    // 2. Time / Read Status Filter
-                    const readMins = calculateReadMinutes(movie.wordCount);
+                    const readMins = calculateReadMinutes(movie.word_count);
                     if (state.selectedTimeFilter === '2' && readMins > 2) return false;
                     if (state.selectedTimeFilter === '3' && readMins > 3) return false;
                     if (state.selectedTimeFilter === 'UNREAD' && state.readMovieIds.includes(movie.id)) return false;
 
-                    // 3. Search Query Filter
                     if (state.searchQuery.trim() !== '') {
                         const q = state.searchQuery.toLowerCase().trim();
-                        const matchTitle = movie.title.toLowerCase().includes(q);
-                        const matchGenre = movie.genre.toLowerCase().includes(q);
-                        const matchHook = movie.hook.toLowerCase().includes(q);
-                        const matchPlatform = movie.platform.toLowerCase().includes(q);
-                        return matchTitle || matchGenre || matchHook || matchPlatform;
+                        return (
+                            movie.title.toLowerCase().includes(q) ||
+                            movie.genre.toLowerCase().includes(q) ||
+                            movie.hook_summary.toLowerCase().includes(q) ||
+                            movie.platform.toLowerCase().includes(q)
+                        );
                     }
 
                     return true;
@@ -1682,7 +1779,6 @@
             }
 
             function renderMovies() {
-                // Check Error State first
                 if (state.isErrorSimulated) {
                     els.movieGrid.style.display = 'none';
                     els.emptyState.classList.remove('visible');
@@ -1693,7 +1789,6 @@
                 els.errorState.classList.remove('visible');
                 const filtered = getFilteredMovies();
 
-                // Check Empty State
                 if (filtered.length === 0) {
                     els.movieGrid.style.display = 'none';
                     els.emptyState.classList.add('visible');
@@ -1705,14 +1800,14 @@
                 els.movieGrid.innerHTML = '';
 
                 filtered.forEach((movie, index) => {
-                    const readMins = calculateReadMinutes(movie.wordCount);
+                    const readMins = calculateReadMinutes(movie.word_count);
                     const savedMins = calculateSavedMinutes(movie);
                     const isRead = state.readMovieIds.includes(movie.id);
-                    const isFeatured = movie.featured && index === 0 && filtered.length > 2;
+                    const isFeatured = movie.is_featured && index === 0 && filtered.length > 2;
 
                     const card = document.createElement('article');
                     card.className = `bento-card ${isFeatured ? 'featured' : ''} ${isRead ? 'read-completed' : ''}`;
-                    const posterArtwork = POSTER_SVGS[movie.id] || '';
+                    const posterArtwork = movie.poster_svg || FALLBACK_POSTERS[movie.id] || '';
 
                     card.innerHTML = `
                         <div>
@@ -1722,7 +1817,7 @@
                             <div class="card-header">
                                 <span class="platform-badge" data-platform="${movie.platform}">${movie.platform}</span>
                                 <div class="time-comparison" title="ประหยัดเวลาไป ${savedMins} นาที">
-                                    <span class="original-time">${movie.runtimeMinutes} นาที</span>
+                                    <span class="original-time">${movie.runtime_minutes} นาที</span>
                                     <span class="arrow-right">→</span>
                                     <span class="read-time">อ่าน ${readMins} นาที</span>
                                 </div>
@@ -1731,15 +1826,15 @@
                             <div class="movie-meta">
                                 <span>${movie.genre}</span>
                                 <span>•</span>
-                                <span>ปี ${movie.year}</span>
+                                <span>ปี ${movie.release_year}</span>
                                 <span>•</span>
                                 <span>ประหยัด ${savedMins} นาที</span>
                             </div>
-                            <p class="movie-hook">${movie.hook}</p>
+                            <p class="movie-hook">${movie.hook_summary}</p>
                         </div>
 
                         <div class="card-footer">
-                            <span class="gossip-score">ความน่าเม้าส์: <strong>${movie.gossipScore}</strong></span>
+                            <span class="gossip-score">ความน่าเม้าส์: <strong>${movie.gossip_score}</strong></span>
                             <button type="button" class="btn-read-spoiler ${isRead ? 'is-read' : ''}" data-open-id="${movie.id}">
                                 ${isRead ? '✓ อ่านสปอยแล้ว' : 'อ่านสปอยทันที →'}
                             </button>
@@ -1757,13 +1852,12 @@
                 clearTimeout(toastTimeout);
                 toastTimeout = setTimeout(() => {
                     els.toast.classList.remove('show');
-                }, 2800);
+                }, 3000);
             }
 
             /* ------------------------------------------------------------------
                7. EVENT LISTENERS
                ------------------------------------------------------------------ */
-            // Search input
             els.searchInput.addEventListener('input', (e) => {
                 state.searchQuery = e.target.value;
                 els.btnClearSearch.classList.toggle('visible', state.searchQuery.length > 0);
@@ -1778,7 +1872,6 @@
                 renderMovies();
             });
 
-            // Platform filters
             els.platformBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     els.platformBtns.forEach(b => b.classList.remove('active'));
@@ -1788,7 +1881,6 @@
                 });
             });
 
-            // Time filters
             els.timeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     els.timeBtns.forEach(b => b.classList.remove('active'));
@@ -1798,7 +1890,6 @@
                 });
             });
 
-            // Event Delegation for Movie Cards
             els.movieGrid.addEventListener('click', (e) => {
                 const openBtn = e.target.closest('[data-open-id]');
                 if (openBtn) {
@@ -1806,7 +1897,6 @@
                 }
             });
 
-            // Full-Page Reader Depth Tabs
             els.depthTabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     state.activeModalDepth = tab.dataset.depth;
@@ -1814,27 +1904,30 @@
                 });
             });
 
-            // Mark as Read button inside Reader Page
-            els.btnMarkAsRead.addEventListener('click', () => {
+            els.btnMarkAsRead.addEventListener('click', async () => {
                 const movieId = state.activeModalMovieId;
                 if (!movieId) return;
 
-                const movie = MOVIES_DATA.find(m => m.id === movieId);
+                const movie = state.movies.find(m => m.id === movieId);
                 const savedMins = calculateSavedMinutes(movie);
 
                 if (!state.readMovieIds.includes(movieId)) {
                     state.readMovieIds.push(movieId);
-                    saveReadHistory();
+                    saveLocalReadHistory();
                     updateSavedTimeDashboard();
                     updateReaderMarkButton(true, savedMins);
                     renderMovies();
-                    showToast(`🎉 บันทึกสำเร็จ! คุณประหยัดเวลาไปได้อีก ${savedMins} นาที`);
+
+                    // บันทึก CRM Transaction ลง Supabase (ถ้าล็อกอินอยู่)
+                    await recordReadingTransaction(movie, savedMins);
+
+                    const syncMsg = state.user ? ' (ซิงก์เข้าบัญชี CRM แล้ว)' : '';
+                    showToast(`🎉 บันทึกสำเร็จ! ประหยัดเวลาไปได้อีก ${savedMins} นาที${syncMsg}`);
                 } else {
                     showToast('คุณได้บันทึกเวลาของเรื่องนี้ไปแล้ว');
                 }
             });
 
-            // Copy Gossip Quote (Using execCommand fallback for maximum compatibility)
             els.btnCopyGossip.addEventListener('click', () => {
                 const textToCopy = els.gossipQuoteText.textContent;
                 const tempTextarea = document.createElement('textarea');
@@ -1845,6 +1938,9 @@
                 tempTextarea.select();
                 try {
                     document.execCommand('copy');
+                    if (state.activeModalMovieId) {
+                        recordGossipCopyLog(state.activeModalMovieId);
+                    }
                     showToast('📋 คัดลอกประโยคเด็ดลงคลิปบอร์ดแล้ว พร้อมส่งเข้ากรุ๊ปแชท!');
                 } catch (err) {
                     showToast('ไม่สามารถคัดลอกอัตโนมัติได้ กรุณาลากคลุมข้อความ');
@@ -1852,7 +1948,64 @@
                 document.body.removeChild(tempTextarea);
             });
 
-            // Back to Home & Browser History Navigation
+            // Auth Modal Handlers
+            els.btnCrmAuth.addEventListener('click', async () => {
+                if (state.user && supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                    state.user = null;
+                    state.crmProfile = null;
+                    updateCrmAuthHeaderUI();
+                    showToast('ออกจากระบบ CRM เรียบร้อยแล้ว');
+                } else {
+                    els.authModal.classList.add('open');
+                }
+            });
+
+            els.btnCloseAuthModal.addEventListener('click', () => {
+                els.authModal.classList.remove('open');
+            });
+
+            els.btnToggleAuthMode.addEventListener('click', () => {
+                state.isSignUpMode = !state.isSignUpMode;
+                els.authModalTitle.textContent = state.isSignUpMode ? 'สมัครสมาชิก SPOILERBOX CRM' : 'เข้าสู่ระบบ SPOILERBOX CRM';
+                els.btnSubmitAuth.textContent = state.isSignUpMode ? 'สมัครสมาชิกทันที' : 'เข้าสู่ระบบ';
+                els.authSwitchPrompt.textContent = state.isSignUpMode ? 'มีบัญชีอยู่แล้ว?' : 'ยังไม่มีบัญชีสมาชิก?';
+                els.btnToggleAuthMode.textContent = state.isSignUpMode ? 'เข้าสู่ระบบ' : 'สมัครสมาชิกใหม่';
+            });
+
+            els.authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!supabaseClient) {
+                    showToast('⚠️ กรุณาใส่ค่า URL และ ANON_KEY ของ Supabase ในโค้ดก่อนใช้งานระบบสมาชิก');
+                    return;
+                }
+
+                const email = els.authEmail.value.trim();
+                const password = els.authPassword.value;
+                els.btnSubmitAuth.disabled = true;
+                els.btnSubmitAuth.textContent = 'กำลังดำเนินการ...';
+
+                try {
+                    const { data, error } = state.isSignUpMode
+                        ? await supabaseClient.auth.signUp({ email, password })
+                        : await supabaseClient.auth.signInWithPassword({ email, password });
+
+                    if (error) throw error;
+
+                    if (data.user) {
+                        await handleUserSignedIn(data.user);
+                        els.authModal.classList.remove('open');
+                        els.authForm.reset();
+                        showToast(state.isSignUpMode ? '🎉 สมัครสมาชิกและสร้างโปรไฟล์ CRM สำเร็จ!' : '👋 ยินดีต้อนรับกลับมา!');
+                    }
+                } catch (err) {
+                    showToast(`เกิดข้อผิดพลาด: ${err.message}`);
+                } finally {
+                    els.btnSubmitAuth.disabled = false;
+                    els.btnSubmitAuth.textContent = state.isSignUpMode ? 'สมัครสมาชิกทันที' : 'เข้าสู่ระบบ';
+                }
+            });
+
             els.btnBackHome.addEventListener('click', () => closeSpoilerPage(true));
             els.brandLogo.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1868,16 +2021,18 @@
                 }
             });
 
-            // Reset Stats
-            els.btnResetStats.addEventListener('click', () => {
+            els.btnResetStats.addEventListener('click', async () => {
                 state.readMovieIds = [];
-                saveReadHistory();
+                saveLocalReadHistory();
+                if (supabaseClient && state.user) {
+                    await supabaseClient.from('reading_transactions').delete().eq('user_id', state.user.id);
+                    await supabaseClient.from('profiles').update({ total_saved_minutes: 0, crm_segment: 'NEW_JOINER' }).eq('id', state.user.id);
+                }
                 updateSavedTimeDashboard();
                 renderMovies();
                 showToast('รีเซ็ตสถิติเวลาที่ประหยัดได้เรียบร้อยแล้ว');
             });
 
-            // Reset All Filters (from Empty State)
             els.btnResetFilters.addEventListener('click', () => {
                 state.searchQuery = '';
                 state.selectedPlatform = 'ALL';
@@ -1892,7 +2047,6 @@
                 renderMovies();
             });
 
-            // Simulate Error State & Retry
             els.btnSimulateError.addEventListener('click', () => {
                 state.isErrorSimulated = true;
                 renderMovies();
@@ -1907,14 +2061,12 @@
             /* ------------------------------------------------------------------
                8. INITIALIZATION
                ------------------------------------------------------------------ */
-            updateSavedTimeDashboard();
-            renderMovies();
-
-            // Support direct URL hash navigation on load
-            if (window.location.hash.startsWith('#spoiler/')) {
-                const initialId = window.location.hash.replace('#spoiler/', '');
-                openSpoilerPage(initialId, false);
-            }
+            initDatabaseAndAuth().then(() => {
+                if (window.location.hash.startsWith('#spoiler/')) {
+                    const initialId = window.location.hash.replace('#spoiler/', '');
+                    openSpoilerPage(initialId, false);
+                }
+            });
         })();
     </script>
 </body>
