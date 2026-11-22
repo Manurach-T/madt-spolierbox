@@ -63,7 +63,7 @@
         }
 
         /* ==========================================================================
-           2. HEADER & TIME-SAVED DASHBOARD (Bento Top Bar + CRM Auth)
+           2. HEADER & TIME-SAVED DASHBOARD (Bento Top Bar + CRM Auth + Create Button)
            ========================================================================== */
         header {
             position: sticky;
@@ -124,7 +124,7 @@
         .header-right-actions {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.65rem;
             flex-wrap: wrap;
         }
 
@@ -172,6 +172,29 @@
             opacity: 0.35;
             cursor: not-allowed;
             text-decoration: none;
+        }
+
+        /* Add Spoiler Button */
+        .btn-add-spoiler {
+            background: var(--brand-red);
+            border: 1px solid var(--brand-red);
+            color: #FFF;
+            padding: 0.45rem 1rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.82rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 12px var(--brand-red-glow);
+        }
+
+        .btn-add-spoiler:hover {
+            background: var(--brand-red-hover);
+            transform: translateY(-1px);
         }
 
         /* CRM Member Button */
@@ -673,8 +696,13 @@
             transition: background var(--transition-fast);
         }
 
-        .btn-primary-action:hover {
+        .btn-primary-action:hover:not(:disabled) {
             background: var(--brand-red-hover);
+        }
+
+        .btn-primary-action:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
         }
 
         /* ==========================================================================
@@ -942,7 +970,167 @@
         }
 
         /* ==========================================================================
-           8. CRM AUTH MODAL (Supabase Auth Login / Register)
+           8. CREATE / ADD SPOILER PAGE (Bento Form Studio)
+           ========================================================================== */
+        .create-page {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .create-page.active {
+            display: flex;
+        }
+
+        .create-header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .create-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 960px) {
+            .create-grid {
+                grid-template-columns: 1.65fr 1fr;
+                align-items: start;
+            }
+        }
+
+        .form-bento-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.75rem;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .form-row-2 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .form-row-3 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .field-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .field-input, .field-select, .field-textarea {
+            width: 100%;
+            background: var(--bg-main);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.94rem;
+            transition: border-color var(--transition-fast);
+        }
+
+        .field-input:focus, .field-select:focus, .field-textarea:focus {
+            outline: none;
+            border-color: var(--brand-red);
+        }
+
+        .field-textarea {
+            min-height: 105px;
+            resize: vertical;
+            line-height: 1.65;
+        }
+
+        .poster-theme-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.65rem;
+        }
+
+        .theme-option-btn {
+            background: var(--bg-main);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 0.6rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .theme-option-btn.active {
+            border-color: var(--brand-red);
+            background: rgba(229, 9, 20, 0.15);
+            color: #FFF;
+        }
+
+        .live-preview-sticky {
+            position: sticky;
+            top: 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .checkbox-featured {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            background: var(--bg-main);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* ==========================================================================
+           9. CRM AUTH MODAL (Supabase Auth Login / Register)
            ========================================================================== */
         .modal-backdrop {
             position: fixed;
@@ -1063,7 +1251,7 @@
 <body>
 
     <!-- ======================================================================
-         HEADER & TIME-SAVED TRACKER + CRM MEMBER BUTTON
+         HEADER & TIME-SAVED TRACKER + ADD SPOILER + CRM MEMBER BUTTON
          ====================================================================== -->
     <header>
         <div class="nav-container">
@@ -1076,12 +1264,16 @@
             <div class="header-right-actions">
                 <div class="time-saved-widget" aria-live="polite">
                     <span class="pulse-dot"></span>
-                    <span>ประหยัดเวลาชีวิตไปแล้ว: <span class="time-saved-value" id="totalSavedDisplay">0 นาที</span></span>
+                    <span>ประหยัดเวลาชีวิต: <span class="time-saved-value" id="totalSavedDisplay">0 นาที</span></span>
                     <button type="button" class="btn-reset-stats" id="btnResetStats" disabled title="ล้างสถิติเวลาที่ประหยัดได้">รีเซ็ต</button>
                 </div>
 
+                <button type="button" class="btn-add-spoiler" id="btnOpenCreatePage">
+                    <span>+ เพิ่มสปอยหนัง</span>
+                </button>
+
                 <button type="button" class="btn-crm-auth" id="btnCrmAuth">
-                    <span id="crmAuthText">เข้าสู่ระบบ / เก็บสถิติ CRM</span>
+                    <span id="crmAuthText">เข้าสู่ระบบ / CRM</span>
                 </button>
             </div>
         </div>
@@ -1091,7 +1283,9 @@
          MAIN WORKSPACE
          ====================================================================== -->
     <main>
-        <!-- HOME VIEW (Catalog & Filters) -->
+        <!-- ==================================================================
+             1. HOME VIEW (Catalog & Filters)
+             ================================================================== -->
         <div id="homeView">
             <!-- Editorial Intro -->
             <section class="editorial-hero">
@@ -1154,7 +1348,7 @@
         </div>
 
         <!-- ==================================================================
-             SEPARATE FULL-PAGE SPOILER READER VIEW
+             2. SEPARATE FULL-PAGE SPOILER READER VIEW
              ================================================================== -->
         <section id="readerPage" class="reader-page" aria-labelledby="readerMovieTitle">
             <div class="reader-topbar">
@@ -1208,10 +1402,161 @@
                 </aside>
             </div>
         </section>
+
+        <!-- ==================================================================
+             3. SEPARATE FULL-PAGE CREATE / ADD SPOILER VIEW
+             ================================================================== -->
+        <section id="createPage" class="create-page" aria-labelledby="createPageTitle">
+            <div class="create-header-box">
+                <button type="button" id="btnCancelCreate" class="btn-back-home">← ยกเลิกและกลับหน้าหลัก</button>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">บันทึกลงฐานข้อมูล Supabase (ตาราง <code>movies</code> & <code>movie_spoilers</code>)</span>
+            </div>
+
+            <div>
+                <h1 id="createPageTitle" style="font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800;">✍️ เพิ่มสปอยหนังเรื่องใหม่</h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">กรอกข้อมูลหนังและบทสรุปทั้ง 3 ระดับ ระบบจะคำนวณเวลาอ่านและสร้างการ์ดโปสเตอร์ให้อัตโนมัติ</p>
+            </div>
+
+            <form id="createSpoilerForm" class="create-grid">
+                <!-- Left Column: Input Fields -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Card 1: Basic Movie Info -->
+                    <div class="form-bento-card">
+                        <h3 class="form-section-title">1. ข้อมูลพื้นฐานของภาพยนตร์ / ซีรีส์</h3>
+                        
+                        <div class="form-row-2">
+                            <div class="field-group">
+                                <label class="field-label" for="inpTitle">ชื่อหนัง / ซีรีส์ *</label>
+                                <input type="text" id="inpTitle" class="field-input" placeholder="เช่น Squid Game ซีซัน 2" required>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="inpPlatform">แพลตฟอร์มสตรีมมิง *</label>
+                                <select id="inpPlatform" class="field-select" required>
+                                    <option value="Netflix">Netflix</option>
+                                    <option value="Disney+">Disney+</option>
+                                    <option value="HBO Max">HBO Max</option>
+                                    <option value="Prime Video">Prime Video</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-3">
+                            <div class="field-group">
+                                <label class="field-label" for="inpGenre">หมวดหมู่ / แนวเรื่อง *</label>
+                                <input type="text" id="inpGenre" class="field-input" placeholder="เช่น ระทึกขวัญ / เอาชีวิตรอด" required>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="inpYear">ปีที่ฉาย *</label>
+                                <input type="number" id="inpYear" class="field-input" value="2025" min="1950" max="2030" required>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="inpRuntime">ความยาวหนังจริง (นาที) *</label>
+                                <input type="number" id="inpRuntime" class="field-input" value="120" min="10" max="1500" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="field-group">
+                                <label class="field-label" for="inpGossipScore">คะแนนความน่าเม้าส์ (เต็ม 10)</label>
+                                <input type="text" id="inpGossipScore" class="field-input" value="9.5/10" placeholder="เช่น 9.5/10">
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">ธีมสีปกโปสเตอร์อัตโนมัติ</label>
+                                <div class="poster-theme-selector" id="posterThemeSelector">
+                                    <button type="button" class="theme-option-btn active" data-theme="noir">🌑 ระทึกขวัญ</button>
+                                    <button type="button" class="theme-option-btn" data-theme="scifi">🔥 ไซไฟ/เดือด</button>
+                                    <button type="button" class="theme-option-btn" data-theme="drama">✨ ดราม่า/แฟนตาซี</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="inpHook">คำโปรยสั้นๆ หน้าการ์ด (Hook Summary) *</label>
+                            <textarea id="inpHook" class="field-textarea" style="min-height: 75px;" placeholder="เขียนสรุปสั้นๆ 1-2 ประโยคให้น่ากดเข้ามาอ่าน..." required></textarea>
+                        </div>
+
+                        <label class="checkbox-featured">
+                            <input type="checkbox" id="inpFeatured">
+                            <span>ปักหมุดเป็นเรื่องเด่นประจำสัปดาห์ (แสดงการ์ดขนาดใหญ่ 2 คอลัมน์)</span>
+                        </label>
+                    </div>
+
+                    <!-- Card 2: 3 Levels of Spoiler Content -->
+                    <div class="form-bento-card">
+                        <h3 class="form-section-title">2. เนื้อหาสปอย 3 ระดับ & โพยเม้าส์กับเพื่อน</h3>
+
+                        <div class="field-group">
+                            <label class="field-label" for="inpOverview">
+                                <span>ระดับที่ 1: สรุปภาพรวม (30 วินาที) *</span>
+                            </label>
+                            <textarea id="inpOverview" class="field-textarea" placeholder="เล่าโครงเรื่องหลักตั้งแต่ต้นจนเข้าปมสำคัญแบบกระชับ..." required></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="inpDetailed">
+                                <span>ระดับที่ 2: เล่าละเอียด + จุดหักมุม *</span>
+                            </label>
+                            <textarea id="inpDetailed" class="field-textarea" placeholder="เปิดเผยจุดหักมุมสำคัญ ความลับของตัวละคร และจุดเปลี่ยนของเรื่อง..." required></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="inpEnding">
+                                <span>ระดับที่ 3: เฉลยตอนจบ & ทฤษฎี *</span>
+                            </label>
+                            <textarea id="inpEnding" class="field-textarea" placeholder="ใครรอด ใครตาย จบยังไง และมีประเด็นอะไรให้ถกเถียงต่อ..." required></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="inpGossipQuote">
+                                <span>💬 โพยประโยคเด็ดสำหรับก๊อปปี้ไปเม้าส์กับเพื่อน *</span>
+                            </label>
+                            <textarea id="inpGossipQuote" class="field-textarea" style="min-height: 80px;" placeholder="เช่น “เอาจริงนะ จุดพีคสุดของเรื่องไม่ใช่ตอนสู้กัน แต่เป็นตอนเฉลยว่า...”" required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Live Bento Card Preview & Submit -->
+                <aside class="live-preview-sticky">
+                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                        ตัวอย่างการ์ดที่จะแสดงบนหน้าเว็บ
+                    </div>
+
+                    <article class="bento-card" id="livePreviewCard">
+                        <div>
+                            <div class="card-poster" id="previewPosterBox"></div>
+                            <div class="card-header">
+                                <span class="platform-badge" id="previewPlatform" data-platform="Netflix">Netflix</span>
+                                <div class="time-comparison">
+                                    <span class="original-time" id="previewRuntime">120 นาที</span>
+                                    <span class="arrow-right">→</span>
+                                    <span class="read-time" id="previewReadTime">อ่าน 1 นาที</span>
+                                </div>
+                            </div>
+                            <h2 class="movie-title" id="previewTitle">ชื่อหนังของคุณจะแสดงตรงนี้</h2>
+                            <div class="movie-meta" id="previewMeta">หมวดหมู่ • ปี 2025 • ประหยัด 119 นาที</div>
+                            <p class="movie-hook" id="previewHook">คำโปรยสั้นๆ หน้าการ์ดจะปรากฏที่นี่...</p>
+                        </div>
+                        <div class="card-footer">
+                            <span class="gossip-score">ความน่าเม้าส์: <strong id="previewScore">9.5/10</strong></span>
+                            <span class="btn-read-spoiler" style="pointer-events: none;">อ่านสปอยทันที →</span>
+                        </div>
+                    </article>
+
+                    <div class="action-bento-card">
+                        <div class="saved-calculation-note" id="previewFormulaNote">
+                            คำนวณอัตโนมัติ: ความยาวบทความ ~0 คำ (อ่านจบใน <strong>1 นาที</strong>)
+                        </div>
+                        <button type="submit" id="btnSubmitCreate" class="btn-primary-action" style="width: 100%; padding: 0.95rem; font-size: 1rem;">
+                            🚀 บันทึกและเผยแพร่สปอยทันที
+                        </button>
+                    </div>
+                </aside>
+            </form>
+        </section>
     </main>
 
     <!-- ======================================================================
-         CRM MEMBER LOGIN / REGISTER MODAL (Supabase Auth)
+         CRM AUTH MODAL (Supabase Auth Login / Register)
          ====================================================================== -->
     <div id="authModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
         <div class="auth-dialog">
@@ -1246,8 +1591,8 @@
                0. SUPABASE CONFIGURATION (ใส่ค่าจาก Supabase Project Settings -> API)
                ------------------------------------------------------------------ */
             const SUPABASE_CONFIG = {
-                URL: 'https://wpvysacmetogapkvovgi.supabase.co',
-                ANON_KEY: 'sb_publishable_79xx3UwPjFfqUTyCLCYbPg_j0WXCvgN'
+                URL: 'YOUR_SUPABASE_PROJECT_URL',
+                ANON_KEY: 'YOUR_SUPABASE_ANON_KEY'
             };
 
             const isSupabaseConfigured =
@@ -1259,8 +1604,35 @@
                 : null;
 
             /* ------------------------------------------------------------------
-               1. FALLBACK LOCAL DATA (ทำงานสำรองอัตโนมัติหากยังไม่ใส่ Supabase Key)
+               1. DYNAMIC SVG POSTER GENERATOR & FALLBACK LOCAL DATA
                ------------------------------------------------------------------ */
+            function generateCustomPosterSVG(title, subtitle, theme = 'noir') {
+                const safeTitle = (title || 'NEW SPOILER').replace(/[<>&"']/g, '').slice(0, 26);
+                const safeSub = (subtitle || 'สรุปสปอยฉบับรวบรัด').replace(/[<>&"']/g, '').slice(0, 34);
+
+                const palettes = {
+                    noir: { bg1: '#1E293B', bg2: '#090D16', accent: '#EF4444', text: '#F8FAFC' },
+                    scifi: { bg1: '#7C2D12', bg2: '#1C1917', accent: '#FACC15', text: '#FFFBEB' },
+                    drama: { bg1: '#312E81', bg2: '#0F172A', accent: '#38BDF8', text: '#F8FAFC' }
+                };
+                const p = palettes[theme] || palettes.noir;
+
+                return `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="customGrad_${theme}" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="${p.bg1}"/>
+                            <stop offset="100%" stop-color="${p.bg2}"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="600" height="320" fill="url(#customGrad_${theme})"/>
+                    <circle cx="480" cy="120" r="95" fill="${p.accent}" opacity="0.22"/>
+                    <circle cx="510" cy="210" r="55" fill="${p.accent}" opacity="0.15"/>
+                    <rect x="32" y="95" width="44" height="5" rx="2.5" fill="${p.accent}"/>
+                    <text x="32" y="145" fill="${p.text}" font-family="sans-serif" font-weight="800" font-size="32">${safeTitle}</text>
+                    <text x="32" y="178" fill="${p.accent}" font-family="sans-serif" font-weight="600" font-size="17">${safeSub}</text>
+                </svg>`;
+            }
+
             const FALLBACK_POSTERS = {
                 'mv-00': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="stormBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E293B"/><stop offset="55%" stop-color="#0F172A"/><stop offset="100%" stop-color="#05080F"/></linearGradient><radialGradient id="flashlight" cx="0.62" cy="0.68" r="0.45"><stop offset="0%" stop-color="rgba(226, 232, 240, 0.45)"/><stop offset="60%" stop-color="rgba(148, 163, 184, 0.1)"/><stop offset="100%" stop-color="rgba(15, 23, 42, 0)"/></radialGradient></defs><rect width="600" height="320" fill="url(#stormBg)"/><path d="M0 240 L35 120 L70 240 Z M50 240 L95 95 L140 240 Z M120 240 L165 135 L210 240 Z M440 240 L485 100 L530 240 Z M500 240 L550 115 L600 240 Z" fill="#090D16"/><polygon points="365,225 560,110 580,270" fill="url(#flashlight)"/><circle cx="350" cy="145" r="24" fill="#1E293B"/><path d="M310 320 L320 185 C325 172, 375 172, 380 185 L395 320 Z" fill="#111827"/><text x="32" y="165" fill="#F8FAFC" font-family="sans-serif" font-weight="800" font-size="44">เงาในพายุ</text><text x="34" y="196" fill="#EF4444" font-family="sans-serif" font-weight="700" font-size="18">เสียงที่ไม่ได้รับเชิญ</text></svg>`,
                 'mv-01': `<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"><rect width="600" height="320" fill="#1C1917"/><circle cx="460" cy="110" r="65" fill="#7F1D1D" opacity="0.65"/><rect x="425" y="75" width="70" height="190" rx="6" fill="#18181B" stroke="#DC2626" stroke-width="2"/><text x="32" y="140" fill="#FCA5A5" font-family="sans-serif" font-weight="800" font-size="38">EXHUMA</text><text x="34" y="172" fill="#D6D3D1" font-family="sans-serif" font-weight="600" font-size="18">ขุดมันขึ้นมาจากหลุม</text></svg>`,
@@ -1414,7 +1786,7 @@
 
             let state = {
                 movies: [],
-                spoilersCache: {}, // เก็บข้อมูลสปอยที่ดึงจาก Supabase เพื่อลดการยิงซ้ำ
+                spoilersCache: {},
                 user: null,
                 crmProfile: null,
                 isSignUpMode: false,
@@ -1424,7 +1796,8 @@
                 isErrorSimulated: false,
                 readMovieIds: loadLocalReadHistory(),
                 activeModalMovieId: null,
-                activeModalDepth: 'overview'
+                activeModalDepth: 'overview',
+                selectedPosterTheme: 'noir'
             };
 
             function loadLocalReadHistory() {
@@ -1454,6 +1827,15 @@
                 return Math.max(0, movie.runtime_minutes - readMins);
             }
 
+            function estimateThaiWordCount(text) {
+                const cleaned = (text || '').trim();
+                if (!cleaned) return 0;
+                // ประมาณจำนวนคำจากช่องว่างและสัดส่วนความยาวตัวอักษรภาษาไทย (เฉลี่ย 4.5 ตัวอักษร/คำ)
+                const spaceWords = cleaned.split(/\s+/).length;
+                const charWords = Math.ceil(cleaned.length / 4.5);
+                return Math.max(spaceWords, charWords);
+            }
+
             function formatDurationThai(totalMinutes) {
                 if (totalMinutes <= 0) return '0 นาที';
                 const hours = Math.floor(totalMinutes / 60);
@@ -1471,7 +1853,10 @@
                 dbStatusBadge: document.getElementById('dbStatusBadge'),
                 homeView: document.getElementById('homeView'),
                 readerPage: document.getElementById('readerPage'),
+                createPage: document.getElementById('createPage'),
                 btnBackHome: document.getElementById('btnBackHome'),
+                btnOpenCreatePage: document.getElementById('btnOpenCreatePage'),
+                btnCancelCreate: document.getElementById('btnCancelCreate'),
                 movieGrid: document.getElementById('movieGrid'),
                 emptyState: document.getElementById('emptyState'),
                 errorState: document.getElementById('errorState'),
@@ -1498,6 +1883,31 @@
                 btnCopyGossip: document.getElementById('btnCopyGossip'),
                 readerSavedNote: document.getElementById('readerSavedNote'),
                 btnMarkAsRead: document.getElementById('btnMarkAsRead'),
+                // Create Spoiler Page
+                createSpoilerForm: document.getElementById('createSpoilerForm'),
+                inpTitle: document.getElementById('inpTitle'),
+                inpPlatform: document.getElementById('inpPlatform'),
+                inpGenre: document.getElementById('inpGenre'),
+                inpYear: document.getElementById('inpYear'),
+                inpRuntime: document.getElementById('inpRuntime'),
+                inpGossipScore: document.getElementById('inpGossipScore'),
+                inpHook: document.getElementById('inpHook'),
+                inpFeatured: document.getElementById('inpFeatured'),
+                inpOverview: document.getElementById('inpOverview'),
+                inpDetailed: document.getElementById('inpDetailed'),
+                inpEnding: document.getElementById('inpEnding'),
+                inpGossipQuote: document.getElementById('inpGossipQuote'),
+                themeOptionBtns: document.querySelectorAll('.theme-option-btn'),
+                previewPosterBox: document.getElementById('previewPosterBox'),
+                previewPlatform: document.getElementById('previewPlatform'),
+                previewRuntime: document.getElementById('previewRuntime'),
+                previewReadTime: document.getElementById('previewReadTime'),
+                previewTitle: document.getElementById('previewTitle'),
+                previewMeta: document.getElementById('previewMeta'),
+                previewHook: document.getElementById('previewHook'),
+                previewScore: document.getElementById('previewScore'),
+                previewFormulaNote: document.getElementById('previewFormulaNote'),
+                btnSubmitCreate: document.getElementById('btnSubmitCreate'),
                 // Auth Modal
                 btnCrmAuth: document.getElementById('btnCrmAuth'),
                 crmAuthText: document.getElementById('crmAuthText'),
@@ -1518,10 +1928,9 @@
                ------------------------------------------------------------------ */
             async function initDatabaseAndAuth() {
                 if (!supabaseClient) {
-                    // Fallback Mode: ยังไม่ได้ใส่ API Key ของ Supabase
                     state.movies = FALLBACK_MOVIES;
                     FALLBACK_MOVIES.forEach(m => { state.spoilersCache[m.id] = m.spoilers; });
-                    els.dbStatusBadge.innerHTML = '🟡 โหมดออฟไลน์ (ใส่ Supabase Key เพื่อเปิดใช้งาน CRM)';
+                    els.dbStatusBadge.innerHTML = '🟡 โหมดออฟไลน์ (ใส่ Supabase Key เพื่อเปิดใช้งาน Cloud)';
                     updateSavedTimeDashboard();
                     renderMovies();
                     return;
@@ -1529,21 +1938,28 @@
 
                 els.dbStatusBadge.innerHTML = '🟢 เชื่อมต่อ Supabase Cloud แล้ว';
 
-                // 1. ตรวจสอบ Session สมาชิกปัจจุบัน
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session?.user) {
                     await handleUserSignedIn(session.user);
                 }
 
-                // 2. ดึงรายชื่อหนังจากตาราง public.movies
+                await reloadMoviesFromDatabase();
+            }
+
+            async function reloadMoviesFromDatabase() {
+                if (!supabaseClient) {
+                    updateSavedTimeDashboard();
+                    renderMovies();
+                    return;
+                }
+
                 const { data: moviesData, error } = await supabaseClient
                     .from('movies')
                     .select('*')
                     .order('is_featured', { ascending: false })
-                    .order('created_at', { ascending: true });
+                    .order('created_at', { ascending: false });
 
                 if (error || !moviesData || moviesData.length === 0) {
-                    // หากยังไม่ได้รันไฟล์ SQL Seed ให้ใช้ข้อมูลสำรอง
                     state.movies = FALLBACK_MOVIES;
                     FALLBACK_MOVIES.forEach(m => { state.spoilersCache[m.id] = m.spoilers; });
                 } else {
@@ -1556,7 +1972,6 @@
 
             async function handleUserSignedIn(user) {
                 state.user = user;
-                // ดึงข้อมูล CRM Profile และประวัติการอ่านจาก Supabase
                 const [profileRes, txRes] = await Promise.all([
                     supabaseClient.from('profiles').select('*').eq('id', user.id).single(),
                     supabaseClient.from('reading_transactions').select('movie_id').eq('user_id', user.id)
@@ -1567,7 +1982,6 @@
                 }
                 if (txRes.data) {
                     const cloudIds = txRes.data.map(row => row.movie_id);
-                    // รวมประวัติในเครื่องเข้ากับประวัติบน Cloud
                     state.readMovieIds = Array.from(new Set([...state.readMovieIds, ...cloudIds]));
                     saveLocalReadHistory();
                 }
@@ -1585,7 +1999,7 @@
                     els.crmAuthText.innerHTML = `👤 ${name} <span class="crm-segment-tag">${segment}</span> (ออก)`;
                 } else {
                     els.btnCrmAuth.classList.remove('logged-in');
-                    els.crmAuthText.textContent = 'เข้าสู่ระบบ / เก็บสถิติ CRM';
+                    els.crmAuthText.textContent = 'เข้าสู่ระบบ / CRM';
                 }
             }
 
@@ -1630,7 +2044,6 @@
                     });
 
                 if (!error) {
-                    // อัปเดต CRM Profile ล่าสุดหลัง Trigger ทำงาน
                     const { data } = await supabaseClient
                         .from('profiles')
                         .select('*')
@@ -1653,8 +2066,21 @@
             }
 
             /* ------------------------------------------------------------------
-               6. PAGE NAVIGATION & INTERACTION HANDLERS
+               6. PAGE NAVIGATION (HOME / READER / CREATE SPOILER)
                ------------------------------------------------------------------ */
+            function switchView(viewName, hashValue = '') {
+                els.homeView.style.display = viewName === 'home' ? 'block' : 'none';
+                els.readerPage.classList.toggle('active', viewName === 'reader');
+                els.createPage.classList.toggle('active', viewName === 'create');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                if (hashValue) {
+                    history.pushState({ viewName }, '', hashValue);
+                } else if (viewName === 'home' && window.location.hash) {
+                    history.pushState(null, '', window.location.pathname + window.location.search);
+                }
+            }
+
             async function openSpoilerPage(movieId, pushHash = true) {
                 const movie = state.movies.find(m => m.id === movieId);
                 if (!movie) return;
@@ -1666,7 +2092,7 @@
                 const savedMins = calculateSavedMinutes(movie);
                 const isRead = state.readMovieIds.includes(movie.id);
 
-                els.readerPosterBox.innerHTML = movie.poster_svg || FALLBACK_POSTERS[movie.id] || '';
+                els.readerPosterBox.innerHTML = movie.poster_svg || FALLBACK_POSTERS[movie.id] || generateCustomPosterSVG(movie.title, movie.genre);
                 els.readerPlatformBadge.textContent = movie.platform;
                 els.readerPlatformBadge.setAttribute('data-platform', movie.platform);
                 els.readerMovieTitle.textContent = movie.title;
@@ -1681,16 +2107,8 @@
                 els.readerSavedNote.innerHTML = `อ่านจบเรื่องนี้ ประหยัดเวลาชีวิตไป <strong>${savedMins} นาที</strong>`;
 
                 updateReaderMarkButton(isRead, savedMins);
+                switchView('reader', pushHash ? `#spoiler/${movieId}` : '');
 
-                els.homeView.style.display = 'none';
-                els.readerPage.classList.add('active');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                if (pushHash) {
-                    history.pushState({ movieId }, '', `#spoiler/${movieId}`);
-                }
-
-                // ดึงเนื้อหาสปอยจาก Database หรือ Cache
                 els.spoilerContentBox.innerHTML = '<p style="color: var(--text-secondary);">กำลังโหลดเนื้อหาสปอย...</p>';
                 const spoilerData = await fetchMovieSpoilerContent(movieId);
                 if (spoilerData) {
@@ -1729,15 +2147,35 @@
                 }
             }
 
-            function closeSpoilerPage(pushHash = true) {
-                els.readerPage.classList.remove('active');
-                els.homeView.style.display = 'block';
-                state.activeModalMovieId = null;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+            function openCreateSpoilerPage(pushHash = true) {
+                updateCreateLivePreview();
+                switchView('create', pushHash ? '#create' : '');
+            }
 
-                if (pushHash && window.location.hash.startsWith('#spoiler/')) {
-                    history.pushState(null, '', window.location.pathname + window.location.search);
-                }
+            function updateCreateLivePreview() {
+                const title = els.inpTitle.value.trim() || 'ชื่อหนังของคุณจะแสดงตรงนี้';
+                const platform = els.inpPlatform.value;
+                const genre = els.inpGenre.value.trim() || 'หมวดหมู่';
+                const year = parseInt(els.inpYear.value, 10) || 2025;
+                const runtime = Math.max(10, parseInt(els.inpRuntime.value, 10) || 120);
+                const score = els.inpGossipScore.value.trim() || '9.5/10';
+                const hook = els.inpHook.value.trim() || 'คำโปรยสั้นๆ หน้าการ์ดจะปรากฏที่นี่...';
+
+                const combinedText = `${els.inpOverview.value} ${els.inpDetailed.value} ${els.inpEnding.value}`;
+                const wordCount = Math.max(120, estimateThaiWordCount(combinedText));
+                const readMins = calculateReadMinutes(wordCount);
+                const savedMins = Math.max(0, runtime - readMins);
+
+                els.previewPosterBox.innerHTML = generateCustomPosterSVG(title, `${genre} • ${platform}`, state.selectedPosterTheme);
+                els.previewPlatform.textContent = platform;
+                els.previewPlatform.setAttribute('data-platform', platform);
+                els.previewRuntime.textContent = `${runtime} นาที`;
+                els.previewReadTime.textContent = `อ่าน ${readMins} นาที`;
+                els.previewTitle.textContent = title;
+                els.previewMeta.textContent = `${genre} • ปี ${year} • ประหยัด ${savedMins} นาที`;
+                els.previewHook.textContent = hook;
+                els.previewScore.textContent = score;
+                els.previewFormulaNote.innerHTML = `คำนวณอัตโนมัติ: ความยาวเนื้อหา ~${wordCount} คำ (อ่านจบใน <strong>${readMins} นาที</strong> / ประหยัด <strong>${savedMins} นาที</strong>)`;
             }
 
             function updateSavedTimeDashboard() {
@@ -1807,7 +2245,7 @@
 
                     const card = document.createElement('article');
                     card.className = `bento-card ${isFeatured ? 'featured' : ''} ${isRead ? 'read-completed' : ''}`;
-                    const posterArtwork = movie.poster_svg || FALLBACK_POSTERS[movie.id] || '';
+                    const posterArtwork = movie.poster_svg || FALLBACK_POSTERS[movie.id] || generateCustomPosterSVG(movie.title, movie.genre);
 
                     card.innerHTML = `
                         <div>
@@ -1852,7 +2290,7 @@
                 clearTimeout(toastTimeout);
                 toastTimeout = setTimeout(() => {
                     els.toast.classList.remove('show');
-                }, 3000);
+                }, 3200);
             }
 
             /* ------------------------------------------------------------------
@@ -1918,7 +2356,6 @@
                     updateReaderMarkButton(true, savedMins);
                     renderMovies();
 
-                    // บันทึก CRM Transaction ลง Supabase (ถ้าล็อกอินอยู่)
                     await recordReadingTransaction(movie, savedMins);
 
                     const syncMsg = state.user ? ' (ซิงก์เข้าบัญชี CRM แล้ว)' : '';
@@ -1946,6 +2383,120 @@
                     showToast('ไม่สามารถคัดลอกอัตโนมัติได้ กรุณาลากคลุมข้อความ');
                 }
                 document.body.removeChild(tempTextarea);
+            });
+
+            // Create Spoiler Page Listeners
+            els.btnOpenCreatePage.addEventListener('click', () => openCreateSpoilerPage(true));
+            els.btnCancelCreate.addEventListener('click', () => switchView('home'));
+
+            els.themeOptionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    els.themeOptionBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.selectedPosterTheme = btn.dataset.theme;
+                    updateCreateLivePreview();
+                });
+            });
+
+            [els.inpTitle, els.inpPlatform, els.inpGenre, els.inpYear, els.inpRuntime, els.inpGossipScore, els.inpHook, els.inpOverview, els.inpDetailed, els.inpEnding].forEach(el => {
+                el.addEventListener('input', updateCreateLivePreview);
+                el.addEventListener('change', updateCreateLivePreview);
+            });
+
+            els.createSpoilerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const title = els.inpTitle.value.trim();
+                const platform = els.inpPlatform.value;
+                const genre = els.inpGenre.value.trim();
+                const release_year = parseInt(els.inpYear.value, 10) || 2025;
+                const runtime_minutes = Math.max(10, parseInt(els.inpRuntime.value, 10) || 120);
+                const gossip_score = els.inpGossipScore.value.trim() || '9.5/10';
+                const hook_summary = els.inpHook.value.trim();
+                const is_featured = els.inpFeatured.checked;
+
+                const overview_text = els.inpOverview.value.trim();
+                const detailed_text = els.inpDetailed.value.trim();
+                const ending_text = els.inpEnding.value.trim();
+                const gossip_quote = els.inpGossipQuote.value.trim();
+
+                const word_count = Math.max(120, estimateThaiWordCount(`${overview_text} ${detailed_text} ${ending_text}`));
+                const newMovieId = `mv-${Date.now()}`;
+                const poster_svg = generateCustomPosterSVG(title, `${genre} • ${platform}`, state.selectedPosterTheme);
+
+                els.btnSubmitCreate.disabled = true;
+                els.btnSubmitCreate.textContent = 'กำลังบันทึกข้อมูล...';
+
+                try {
+                    if (supabaseClient) {
+                        // 1. บันทึกลงตาราง public.movies
+                        const { error: movieErr } = await supabaseClient
+                            .from('movies')
+                            .insert({
+                                id: newMovieId,
+                                title,
+                                platform,
+                                genre,
+                                release_year,
+                                runtime_minutes,
+                                word_count,
+                                gossip_score,
+                                is_featured,
+                                hook_summary,
+                                poster_svg
+                            });
+
+                        if (movieErr) throw movieErr;
+
+                        // 2. บันทึกลงตาราง public.movie_spoilers
+                        const { error: spoilerErr } = await supabaseClient
+                            .from('movie_spoilers')
+                            .insert({
+                                movie_id: newMovieId,
+                                overview_text,
+                                detailed_text,
+                                ending_text,
+                                gossip_quote
+                            });
+
+                        if (spoilerErr) throw spoilerErr;
+                    }
+
+                    // อัปเดต State ในหน้าเว็บทันที
+                    const newMovieObj = {
+                        id: newMovieId,
+                        title,
+                        platform,
+                        genre,
+                        release_year,
+                        runtime_minutes,
+                        word_count,
+                        gossip_score,
+                        is_featured,
+                        hook_summary,
+                        poster_svg
+                    };
+
+                    state.movies.unshift(newMovieObj);
+                    state.spoilersCache[newMovieId] = {
+                        overview: overview_text,
+                        detailed: detailed_text,
+                        ending: ending_text,
+                        gossip_quote
+                    };
+
+                    els.createSpoilerForm.reset();
+                    renderMovies();
+                    switchView('home');
+                    showToast(supabaseClient
+                        ? '🎉 บันทึกสปอยเรื่องใหม่ลงฐานข้อมูล Supabase สำเร็จ!'
+                        : '🎉 เพิ่มสปอยเรื่องใหม่ในโหมดออฟไลน์สำเร็จ!');
+                } catch (err) {
+                    showToast(`เกิดข้อผิดพลาดในการบันทึก: ${err.message}`);
+                } finally {
+                    els.btnSubmitCreate.disabled = false;
+                    els.btnSubmitCreate.textContent = '🚀 บันทึกและเผยแพร่สปอยทันที';
+                }
             });
 
             // Auth Modal Handlers
@@ -2006,18 +2557,20 @@
                 }
             });
 
-            els.btnBackHome.addEventListener('click', () => closeSpoilerPage(true));
+            els.btnBackHome.addEventListener('click', () => switchView('home'));
             els.brandLogo.addEventListener('click', (e) => {
                 e.preventDefault();
-                closeSpoilerPage(true);
+                switchView('home');
             });
             window.addEventListener('popstate', () => {
                 const hash = window.location.hash;
                 if (hash.startsWith('#spoiler/')) {
                     const id = hash.replace('#spoiler/', '');
                     openSpoilerPage(id, false);
+                } else if (hash === '#create') {
+                    openCreateSpoilerPage(false);
                 } else {
-                    closeSpoilerPage(false);
+                    switchView('home');
                 }
             });
 
@@ -2065,6 +2618,8 @@
                 if (window.location.hash.startsWith('#spoiler/')) {
                     const initialId = window.location.hash.replace('#spoiler/', '');
                     openSpoilerPage(initialId, false);
+                } else if (window.location.hash === '#create') {
+                    openCreateSpoilerPage(false);
                 }
             });
         })();
