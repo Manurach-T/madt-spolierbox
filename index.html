@@ -1130,59 +1130,89 @@
         }
 
         /* ==========================================================================
-           9. CRM AUTH MODAL (Supabase Auth Login / Register)
+           9. FULL-PAGE LOGIN GATE (บังคับผ่านหน้า Login ก่อนเข้าใช้งาน)
            ========================================================================== */
-        .modal-backdrop {
+        .login-gate-screen {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-            display: none;
+            background: radial-gradient(circle at top right, rgba(229, 9, 20, 0.16), transparent 45%),
+                        radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.08), transparent 45%),
+                        var(--bg-main);
+            z-index: 150;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 1.5rem;
+            overflow-y: auto;
         }
 
-        .modal-backdrop.open {
-            display: flex;
-            animation: fadeIn 0.2s ease;
+        .login-gate-screen.hidden {
+            display: none;
         }
 
-        .auth-dialog {
+        .login-gate-bento {
             background: var(--bg-surface);
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: var(--radius-lg);
             width: 100%;
-            max-width: 440px;
-            padding: 2rem;
-            position: relative;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+            max-width: 920px;
+            display: grid;
+            grid-template-columns: 1fr;
+            overflow: hidden;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.85);
+            animation: fadeIn 0.35s ease;
         }
 
-        .btn-close-auth {
-            position: absolute;
-            top: 1.25rem;
-            right: 1.25rem;
-            background: var(--bg-main);
-            border: 1px solid var(--border-subtle);
+        @media (min-width: 780px) {
+            .login-gate-bento {
+                grid-template-columns: 1.05fr 1fr;
+            }
+        }
+
+        .login-gate-showcase {
+            background: linear-gradient(155deg, rgba(229, 9, 20, 0.18), rgba(20, 20, 23, 0.98) 70%);
+            padding: 2.5rem 2.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        @media (min-width: 780px) {
+            .login-gate-showcase {
+                border-bottom: none;
+                border-right: 1px solid var(--border-subtle);
+            }
+        }
+
+        .login-gate-highlights {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+            font-size: 0.9rem;
             color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
         }
 
-        .btn-close-auth:hover {
-            background: var(--brand-red);
-            color: #FFF;
+        .login-gate-highlights li {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .login-gate-form-box {
+            padding: 2.5rem 2.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .auth-form {
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            margin-top: 1.25rem;
+            margin-top: 1.35rem;
         }
 
         .auth-input {
@@ -1190,22 +1220,24 @@
             background: var(--bg-main);
             border: 1px solid var(--border-subtle);
             color: var(--text-primary);
-            padding: 0.75rem 1rem;
+            padding: 0.85rem 1rem;
             border-radius: var(--radius-md);
             font-family: inherit;
             font-size: 0.95rem;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
         }
 
         .auth-input:focus {
             outline: none;
             border-color: var(--brand-red);
+            box-shadow: 0 0 0 3px var(--brand-red-glow);
         }
 
         .auth-switch {
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.86rem;
             color: var(--text-secondary);
-            margin-top: 1rem;
+            margin-top: 1.15rem;
         }
 
         .auth-switch button {
@@ -1216,6 +1248,43 @@
             cursor: pointer;
             text-decoration: underline;
             font-family: inherit;
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.25rem 0 0.85rem;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .btn-demo-bypass {
+            width: 100%;
+            background: var(--bg-main);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-demo-bypass:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: var(--text-primary);
+            background: var(--bg-surface-hover);
         }
 
         /* Toast Notification */
@@ -1556,23 +1625,56 @@
     </main>
 
     <!-- ======================================================================
-         CRM AUTH MODAL (Supabase Auth Login / Register)
+         FULL-PAGE LOGIN GATE (ด่านเข้าสู่ระบบก่อนเข้าใช้งานเว็บ)
          ====================================================================== -->
-    <div id="authModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
-        <div class="auth-dialog">
-            <button type="button" id="btnCloseAuthModal" class="btn-close-auth" aria-label="ปิดหน้าต่าง">✕</button>
-            <h2 id="authModalTitle" style="font-size: 1.35rem; font-weight: 800;">เข้าสู่ระบบ SPOILERBOX CRM</h2>
-            <p id="authModalDesc" style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.35rem;">ซิงก์ประวัติการอ่านและเวลาชีวิตที่ประหยัดได้ขึ้นฐานข้อมูล Supabase</p>
+    <div id="loginGateScreen" class="login-gate-screen" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+        <div class="login-gate-bento">
+            <!-- Left Showcase Column -->
+            <div class="login-gate-showcase">
+                <div>
+                    <div class="brand" style="margin-bottom: 1.5rem;">
+                        <span class="brand-logo">SB</span>
+                        <span class="brand-text">SPOILERBOX</span>
+                    </div>
+                    <h2 style="font-size: clamp(1.55rem, 3vw, 2rem); font-weight: 800; line-height: 1.25;">
+                        อ่านสปอย <span style="color: var(--brand-red);">2 นาที</span><br>พร้อมเม้าส์เหมือนดูมา 2 ชั่วโมง
+                    </h2>
+                    <ul class="login-gate-highlights">
+                        <li>⚡ สรุปเนื้อเรื่องครบ 3 ระดับ (ภาพรวม / หักมุม / ตอนจบ)</li>
+                        <li>💬 โพยประโยคเด็ด ก๊อปปี้ส่งเข้ากรุ๊ปแชทได้ทันที</li>
+                        <li>⏱️ บันทึกสถิติเวลาชีวิตที่ประหยัดได้สะสมบน Cloud</li>
+                    </ul>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2rem;">
+                    Editorial Minimal & Bento Streaming Digest • Powered by Supabase
+                </div>
+            </div>
 
-            <form id="authForm" class="auth-form">
-                <input type="email" id="authEmail" class="auth-input" placeholder="อีเมลของคุณ (เช่น movie@example.com)" required>
-                <input type="password" id="authPassword" class="auth-input" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" minlength="6" required>
-                <button type="submit" id="btnSubmitAuth" class="btn-primary-action" style="width: 100%; padding: 0.85rem;">เข้าสู่ระบบ</button>
-            </form>
+            <!-- Right Auth Form Column -->
+            <div class="login-gate-form-box">
+                <h2 id="authModalTitle" style="font-size: 1.45rem; font-weight: 800;">เข้าสู่ระบบ SPOILERBOX</h2>
+                <p id="authModalDesc" style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.35rem;">
+                    กรุณาเข้าสู่ระบบหรือสมัครสมาชิกเพื่อเข้าดูคลังสปอยหนังทั้งหมด
+                </p>
 
-            <div class="auth-switch">
-                <span id="authSwitchPrompt">ยังไม่มีบัญชีสมาชิก?</span>
-                <button type="button" id="btnToggleAuthMode">สมัครสมาชิกใหม่</button>
+                <form id="authForm" class="auth-form">
+                    <input type="email" id="authEmail" class="auth-input" placeholder="อีเมลของคุณ (เช่น movie@example.com)" required>
+                    <input type="password" id="authPassword" class="auth-input" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" minlength="6" required>
+                    <button type="submit" id="btnSubmitAuth" class="btn-primary-action" style="width: 100%; padding: 0.9rem; font-size: 0.95rem;">
+                        เข้าสู่ระบบ →
+                    </button>
+                </form>
+
+                <div class="auth-switch">
+                    <span id="authSwitchPrompt">ยังไม่มีบัญชีสมาชิก?</span>
+                    <button type="button" id="btnToggleAuthMode">สมัครสมาชิกใหม่</button>
+                </div>
+
+                <div class="login-divider">หรือ</div>
+
+                <button type="button" id="btnDemoBypass" class="btn-demo-bypass">
+                    🍿 เข้าใช้งานโหมดทดลอง (ไม่ต้องใช้บัญชี)
+                </button>
             </div>
         </div>
     </div>
@@ -1788,6 +1890,7 @@
                 movies: [],
                 spoilersCache: {},
                 user: null,
+                isGuestDemo: false,
                 crmProfile: null,
                 isSignUpMode: false,
                 searchQuery: '',
@@ -1908,11 +2011,10 @@
                 previewScore: document.getElementById('previewScore'),
                 previewFormulaNote: document.getElementById('previewFormulaNote'),
                 btnSubmitCreate: document.getElementById('btnSubmitCreate'),
-                // Auth Modal
+                // Login Gate Screen
                 btnCrmAuth: document.getElementById('btnCrmAuth'),
                 crmAuthText: document.getElementById('crmAuthText'),
-                authModal: document.getElementById('authModal'),
-                btnCloseAuthModal: document.getElementById('btnCloseAuthModal'),
+                loginGateScreen: document.getElementById('loginGateScreen'),
                 authModalTitle: document.getElementById('authModalTitle'),
                 authForm: document.getElementById('authForm'),
                 authEmail: document.getElementById('authEmail'),
@@ -1920,12 +2022,18 @@
                 btnSubmitAuth: document.getElementById('btnSubmitAuth'),
                 authSwitchPrompt: document.getElementById('authSwitchPrompt'),
                 btnToggleAuthMode: document.getElementById('btnToggleAuthMode'),
+                btnDemoBypass: document.getElementById('btnDemoBypass'),
                 toast: document.getElementById('toastNotification')
             };
 
             /* ------------------------------------------------------------------
                5. SUPABASE DATA & CRM TRANSACTION SERVICE
                ------------------------------------------------------------------ */
+            function updateLoginGateVisibility() {
+                const isAuthenticated = Boolean(state.user || state.isGuestDemo);
+                els.loginGateScreen.classList.toggle('hidden', isAuthenticated);
+            }
+
             async function initDatabaseAndAuth() {
                 if (!supabaseClient) {
                     state.movies = FALLBACK_MOVIES;
@@ -1933,6 +2041,7 @@
                     els.dbStatusBadge.innerHTML = '🟡 โหมดออฟไลน์ (ใส่ Supabase Key เพื่อเปิดใช้งาน Cloud)';
                     updateSavedTimeDashboard();
                     renderMovies();
+                    updateLoginGateVisibility();
                     return;
                 }
 
@@ -1943,6 +2052,7 @@
                     await handleUserSignedIn(session.user);
                 }
 
+                updateLoginGateVisibility();
                 await reloadMoviesFromDatabase();
             }
 
@@ -1996,11 +2106,15 @@
                     const name = state.crmProfile?.display_name || state.user.email.split('@')[0];
                     const segment = state.crmProfile?.crm_segment || 'MEMBER';
                     els.btnCrmAuth.classList.add('logged-in');
-                    els.crmAuthText.innerHTML = `👤 ${name} <span class="crm-segment-tag">${segment}</span> (ออก)`;
+                    els.crmAuthText.innerHTML = `👤 ${name} <span class="crm-segment-tag">${segment}</span> (ออกจากระบบ)`;
+                } else if (state.isGuestDemo) {
+                    els.btnCrmAuth.classList.remove('logged-in');
+                    els.crmAuthText.textContent = '🍿 โหมดทดลอง (เข้าสู่ระบบ)';
                 } else {
                     els.btnCrmAuth.classList.remove('logged-in');
                     els.crmAuthText.textContent = 'เข้าสู่ระบบ / CRM';
                 }
+                updateLoginGateVisibility();
             }
 
             async function fetchMovieSpoilerContent(movieId) {
@@ -2495,31 +2609,31 @@
                     showToast(`เกิดข้อผิดพลาดในการบันทึก: ${err.message}`);
                 } finally {
                     els.btnSubmitCreate.disabled = false;
-                    els.btnSubmitCreate.textContent = '🚀 บันทึกและเผยแพร่สปอยทันที';
-                }
-            });
-
-            // Auth Modal Handlers
+            // Login Gate & Auth Handlers
             els.btnCrmAuth.addEventListener('click', async () => {
                 if (state.user && supabaseClient) {
                     await supabaseClient.auth.signOut();
                     state.user = null;
                     state.crmProfile = null;
+                    state.isGuestDemo = false;
                     updateCrmAuthHeaderUI();
-                    showToast('ออกจากระบบ CRM เรียบร้อยแล้ว');
+                    showToast('ออกจากระบบเรียบร้อยแล้ว');
                 } else {
-                    els.authModal.classList.add('open');
+                    state.isGuestDemo = false;
+                    updateCrmAuthHeaderUI();
                 }
             });
 
-            els.btnCloseAuthModal.addEventListener('click', () => {
-                els.authModal.classList.remove('open');
+            els.btnDemoBypass.addEventListener('click', () => {
+                state.isGuestDemo = true;
+                updateCrmAuthHeaderUI();
+                showToast('🍿 เข้าใช้งานในโหมดทดลองเรียบร้อยแล้ว');
             });
 
             els.btnToggleAuthMode.addEventListener('click', () => {
                 state.isSignUpMode = !state.isSignUpMode;
-                els.authModalTitle.textContent = state.isSignUpMode ? 'สมัครสมาชิก SPOILERBOX CRM' : 'เข้าสู่ระบบ SPOILERBOX CRM';
-                els.btnSubmitAuth.textContent = state.isSignUpMode ? 'สมัครสมาชิกทันที' : 'เข้าสู่ระบบ';
+                els.authModalTitle.textContent = state.isSignUpMode ? 'สมัครสมาชิก SPOILERBOX' : 'เข้าสู่ระบบ SPOILERBOX';
+                els.btnSubmitAuth.textContent = state.isSignUpMode ? 'สมัครสมาชิกและเข้าใช้งาน →' : 'เข้าสู่ระบบ →';
                 els.authSwitchPrompt.textContent = state.isSignUpMode ? 'มีบัญชีอยู่แล้ว?' : 'ยังไม่มีบัญชีสมาชิก?';
                 els.btnToggleAuthMode.textContent = state.isSignUpMode ? 'เข้าสู่ระบบ' : 'สมัครสมาชิกใหม่';
             });
@@ -2527,7 +2641,7 @@
             els.authForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!supabaseClient) {
-                    showToast('⚠️ กรุณาใส่ค่า URL และ ANON_KEY ของ Supabase ในโค้ดก่อนใช้งานระบบสมาชิก');
+                    showToast('⚠️ ยังไม่ได้ตั้งค่า Supabase Key กรุณากดปุ่ม "เข้าใช้งานโหมดทดลอง" ด้านล่าง');
                     return;
                 }
 
@@ -2544,16 +2658,16 @@
                     if (error) throw error;
 
                     if (data.user) {
+                        state.isGuestDemo = false;
                         await handleUserSignedIn(data.user);
-                        els.authModal.classList.remove('open');
                         els.authForm.reset();
-                        showToast(state.isSignUpMode ? '🎉 สมัครสมาชิกและสร้างโปรไฟล์ CRM สำเร็จ!' : '👋 ยินดีต้อนรับกลับมา!');
+                        showToast(state.isSignUpMode ? '🎉 สมัครสมาชิกและเข้าสู่ระบบสำเร็จ!' : '👋 ยินดีต้อนรับเข้าสู่ SPOILERBOX!');
                     }
                 } catch (err) {
                     showToast(`เกิดข้อผิดพลาด: ${err.message}`);
                 } finally {
                     els.btnSubmitAuth.disabled = false;
-                    els.btnSubmitAuth.textContent = state.isSignUpMode ? 'สมัครสมาชิกทันที' : 'เข้าสู่ระบบ';
+                    els.btnSubmitAuth.textContent = state.isSignUpMode ? 'สมัครสมาชิกและเข้าใช้งาน →' : 'เข้าสู่ระบบ →';
                 }
             });
 
